@@ -8,3 +8,4 @@ yarn-error.log*
 lab_tech.db
 lab_tech.db-journal
 lab-tech-data.json
+*.bak

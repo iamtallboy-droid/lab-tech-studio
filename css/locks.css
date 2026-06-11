@@ -1,0 +1,73 @@
+/* Module: locks — overlay lock state styles */
+
+.lock-toggle {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-main);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.lock-toggle:hover {
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.lock-toggle.locked {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #F59E0B;
+}
+
+.subtabs-content-area.overlay-locked {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.45;
+    filter: grayscale(0.3);
+}
+
+.subtabs-content-area.overlay-locked::after {
+    content: '🔒 LOCKED';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(245, 158, 11, 0.6);
+    letter-spacing: 2px;
+    pointer-events: none;
+}
+
+/* Preview/Program border indicators */
+.overlay-preview-area.preview-state {
+    border-color: rgba(45, 211, 111, 0.4) !important;
+}
+
+.overlay-preview-area.preview-state .preview-header::after {
+    content: '🟢 PREVIEW';
+    font-size: 10px;
+    font-weight: 700;
+    color: #2DD36F;
+    letter-spacing: 1px;
+}
+
+.overlay-preview-area.program-state {
+    border-color: rgba(255, 59, 48, 0.4) !important;
+    box-shadow: 0 0 20px rgba(255, 59, 48, 0.1);
+}
+
+.overlay-preview-area.program-state .preview-header::after {
+    content: '🔴 PROGRAM';
+    font-size: 10px;
+    font-weight: 700;
+    color: #FF3B30;
+    letter-spacing: 1px;
+}

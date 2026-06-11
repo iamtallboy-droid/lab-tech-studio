@@ -1,0 +1,96 @@
+/* Module: briefs — extracted from dashboard.css */
+
+/* -------------------------------------------------------------
+   EPISODE BRIEFS PLANNER
+   ------------------------------------------------------------- */
+.brief-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.brief-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brief-split-workspace {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    height: 520px;
+}
+
+.brief-list-pane {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.brief-list-card {
+    background-color: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.brief-list-card:hover {
+    background-color: rgba(255,255,255,0.06);
+    border-color: var(--primary-color);
+}
+
+.brief-list-card.active {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-color), 0.1);
+}
+
+.brief-list-card .b-date {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 4px;
+}
+
+.brief-list-card .b-obj {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brief-editor-pane {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.brief-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.no-selection-message {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+}

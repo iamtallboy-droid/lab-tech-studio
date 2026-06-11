@@ -1,0 +1,249 @@
+/* =================================================================
+   LIVE MODE — Production Overlay Styles
+   Controls the ON AIR state, sidebar collapse, and live mode toggle.
+   ================================================================= */
+
+/* ON AIR indicator bar — persistent red glow strip across top */
+.on-air-bar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #FF3B30, #FF6B3B, #FF3B30);
+    background-size: 200% 100%;
+    z-index: 999;
+    animation: air-pulse 2s ease infinite, air-sweep 3s linear infinite;
+}
+
+@keyframes air-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes air-sweep {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+body.live-mode .on-air-bar {
+    display: block;
+}
+
+/* ─── Live mode: hide config-only sections ─── */
+body.live-mode .config-only {
+    display: none !important;
+}
+
+/* ─── Live mode: enlarge action buttons for touch/speed ─── */
+body.live-mode .btn-primary {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 14px;
+    padding: 12px 24px;
+}
+
+/* ─── Live mode: dim config-only tabs ─── */
+body.live-mode .nav-tab.config-tab {
+    opacity: 0.4;
+    font-size: 11px;
+    pointer-events: auto;
+}
+
+body.live-mode .nav-tab.config-tab:hover {
+    opacity: 0.7;
+}
+
+/* ─── Live mode: overlay preview gets red PROGRAM border ─── */
+body.live-mode .overlay-preview-area {
+    border-color: rgba(255, 59, 48, 0.5);
+    box-shadow: 0 0 20px rgba(255, 59, 48, 0.15);
+}
+
+body.live-mode .preview-header::after {
+    content: '🔴 PROGRAM';
+    font-size: 10px;
+    font-weight: 700;
+    color: #FF3B30;
+    letter-spacing: 1px;
+    margin-left: 12px;
+}
+
+/* =================================================================
+   SIDEBAR COLLAPSE TOGGLE
+   Works independently of live mode.
+   ================================================================= */
+
+.sidebar-pane {
+    position: relative;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-pane.collapsed {
+    width: 60px;
+    min-width: 60px;
+    padding: 12px 8px;
+    overflow: hidden;
+}
+
+.sidebar-pane.collapsed .sidebar-header h3,
+.sidebar-pane.collapsed .preset-meta,
+.sidebar-pane.collapsed .sidebar-footer .btn span,
+.sidebar-pane.collapsed .sidebar-footer {
+    display: none;
+}
+
+.sidebar-pane.collapsed .preset-item {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-pane.collapsed .preset-name {
+    display: none;
+}
+
+.sidebar-pane.collapsed .color-dot {
+    width: 24px;
+    height: 24px;
+    margin: 0 auto;
+    border-radius: 50%;
+}
+
+/* Sidebar collapse toggle button */
+.sidebar-collapse-btn {
+    position: absolute;
+    top: 50%;
+    right: -14px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    background: var(--bg-panel, #1a1a2e);
+    border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+    border-radius: 50%;
+    color: var(--text-muted, rgba(255,255,255,0.5));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 10;
+    transition: all 0.2s ease;
+    line-height: 1;
+    padding: 0;
+}
+
+.sidebar-collapse-btn:hover {
+    color: white;
+    border-color: var(--primary-color, #0F6FFF);
+    background: var(--primary-color, #0F6FFF);
+    box-shadow: 0 0 12px rgba(15, 111, 255, 0.3);
+}
+
+/* =================================================================
+   LIVE MODE TOGGLE BUTTON — Header
+   ================================================================= */
+
+.live-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    background: rgba(255, 59, 48, 0.08);
+    color: #FF3B30;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-main, 'Inter', sans-serif);
+    white-space: nowrap;
+}
+
+.live-mode-toggle:hover {
+    background: rgba(255, 59, 48, 0.15);
+    border-color: rgba(255, 59, 48, 0.5);
+    transform: translateY(-1px);
+}
+
+.live-mode-toggle.active {
+    background: #FF3B30;
+    border-color: #FF3B30;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 59, 48, 0.4);
+    animation: live-glow 2s ease infinite;
+}
+
+.live-mode-toggle.active:hover {
+    background: #E62E24;
+    box-shadow: 0 0 20px rgba(255, 59, 48, 0.5);
+}
+
+@keyframes live-glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+    50% { box-shadow: 0 0 25px rgba(255, 59, 48, 0.6); }
+}
+
+/* =================================================================
+   EMERGENCY CLEAR ALL — Quick Action Bar (visible in live mode)
+   ================================================================= */
+
+.emergency-actions-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+body.live-mode .emergency-actions-bar {
+    display: inline-flex;
+}
+
+.emergency-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-main, 'Inter', sans-serif);
+    white-space: nowrap;
+    border: none;
+}
+
+.emergency-btn.clear-all {
+    background: rgba(255, 59, 48, 0.12);
+    color: #FF6B6B;
+    border: 1px solid rgba(255, 59, 48, 0.25);
+}
+
+.emergency-btn.clear-all:hover {
+    background: rgba(255, 59, 48, 0.25);
+    color: #FF3B30;
+    box-shadow: 0 0 12px rgba(255, 59, 48, 0.2);
+    transform: translateY(-1px);
+}
+
+.emergency-btn.brb-btn {
+    background: rgba(255, 193, 7, 0.12);
+    color: #FFC107;
+    border: 1px solid rgba(255, 193, 7, 0.25);
+}
+
+.emergency-btn.brb-btn:hover {
+    background: rgba(255, 193, 7, 0.25);
+    color: #FFD54F;
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
+    transform: translateY(-1px);
+}

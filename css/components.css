@@ -1,0 +1,282 @@
+/* Module: components — extracted from dashboard.css */
+
+.form-section {
+    margin-bottom: 24px;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+    color: var(--primary-color);
+}
+
+.form-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group select,
+.form-group textarea {
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: white;
+    padding: 10px 14px;
+    font-size: 13px;
+    outline: none;
+    font-family: var(--font-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(232, 101, 10, 0.15);
+}
+
+.form-group.check-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-group.check-group label {
+    font-size: 13px;
+    color: white;
+    font-weight: 700;
+}
+
+.colors-editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.color-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.color-control input[type="color"] {
+    border: none;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.color-control span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.toggle-buttons {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    padding: 2px;
+}
+
+.toggle-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 0;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: var(--font-main);
+    transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+.badge {
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.form-group-sm {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.form-group-sm label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.form-group-sm input,
+.form-group-sm textarea {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    color: white;
+    padding: 8px 10px;
+    font-size: 12px;
+    outline: none;
+    font-family: var(--font-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group-sm input:focus,
+.form-group-sm textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(232, 101, 10, 0.15);
+}
+
+.form-group-sm textarea {
+    resize: none;
+}
+
+/* -------------------------------------------------------------
+   UTILITY BUTTONS & GENERALS
+   ------------------------------------------------------------- */
+.btn {
+    border-radius: 8px;
+    border: none;
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-danger {
+    background-color: var(--accent-red);
+    color: white;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-outline:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-color: var(--primary-color);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+}
+
+.btn-outline-danger:hover {
+    background-color: rgba(255, 59, 48, 0.05);
+}
+
+/* Warnings overlays */
+.bench-override-banner {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent-red);
+    border: 2px solid #ff7e79;
+    box-shadow: 0 0 25px rgba(255, 59, 48, 0.85);
+    color: white;
+    padding: 16px 28px;
+    border-radius: 8px;
+    z-index: 1000;
+    text-align: center;
+    width: 480px;
+    transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bench-override-banner.show {
+    top: 24px;
+}
+
+.bench-override-banner .warning-title {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.bench-override-banner .warning-desc {
+    font-size: 12px;
+}

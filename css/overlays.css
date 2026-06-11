@@ -1,0 +1,260 @@
+/* Module: overlays — extracted from dashboard.css */
+
+/* -------------------------------------------------------------
+   OVERLAYS MANAGER LAYOUT
+   ------------------------------------------------------------- */
+.overlays-layout {
+    display: grid;
+    grid-template-columns: 480px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.overlay-controls-area {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--glass-shadow);
+    border-left: 2px solid rgba(0, 194, 255, 0.15);
+}
+
+.subtabs-bar {
+    background-color: rgba(0,0,0,0.15);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    overflow-x: auto;
+}
+
+.subtab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 14px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    font-family: var(--font-main);
+}
+
+.subtab-btn:hover {
+    color: white;
+}
+
+.subtab-btn.active {
+    color: white;
+    border-bottom-color: var(--primary-color);
+    background-color: rgba(255,255,255,0.02);
+}
+
+.subtabs-content-area {
+    padding: 24px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.sub-panel {
+    display: none;
+}
+
+.sub-panel.active {
+    display: block;
+}
+
+/* D-Pad Alignment Pad Styles */
+.directional-pad-section {
+    margin-top: 16px;
+    background-color: rgba(0,0,0,0.15);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.directional-pad-section label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 12px;
+}
+
+.pad-sub {
+    font-size: 9px;
+    font-weight: 400;
+    opacity: 0.6;
+    text-transform: none;
+}
+
+.directional-dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    gap: 8px;
+    justify-content: center;
+}
+
+.dbtn {
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+
+.dbtn:hover {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-glow);
+}
+
+.dbtn.up { grid-column: 2; grid-row: 1; }
+.dbtn.left { grid-column: 1; grid-row: 2; }
+.dbtn.reset { grid-column: 2; grid-row: 2; font-size: 16px; }
+.dbtn.right { grid-column: 3; grid-row: 2; }
+.dbtn.down { grid-column: 2; grid-row: 3; }
+
+/* Sliders Section */
+.sliders-section {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.slider-header .value {
+    color: var(--secondary-color);
+}
+
+.slider-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-controls input[type="range"] {
+    flex: 1;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.btn-step {
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-step:hover {
+    background-color: var(--primary-color);
+}
+
+/* -------------------------------------------------------------
+   OVERLAYS CANVAS MONITOR PREVIEW
+   ------------------------------------------------------------- */
+.overlay-preview-area {
+    display: flex;
+    flex-direction: column;
+    background-color: #0c0f17;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--glass-shadow);
+}
+
+.preview-header {
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preview-header .title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.preview-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.preview-frame-container {
+    flex: 1;
+    background-image: 
+        linear-gradient(45deg, #0a0e18 25%, transparent 25%), 
+        linear-gradient(-45deg, #0a0e18 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #0a0e18 75%), 
+        linear-gradient(-45deg, transparent 75%, #0a0e18 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    background-color: #060910;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    min-height: 480px;
+}
+
+#preview-iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+.overlay-url-footer {
+    background-color: var(--bg-panel);
+    border-top: 1px solid var(--border-color);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+}
+
+.overlay-url-footer span {
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.overlay-url-footer code {
+    background-color: rgba(0,0,0,0.4);
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 4px;
+    color: var(--secondary-color);
+}

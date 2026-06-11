@@ -1,0 +1,147 @@
+/* Module: status-bar — persistent production status footer */
+
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 36px;
+    background: linear-gradient(180deg, #0a0f1a, #070b14);
+    border-top: 1px solid rgba(0, 194, 255, 0.12);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    z-index: 150;
+    flex-shrink: 0;
+    font-family: var(--font-main);
+}
+
+.status-bar-left,
+.status-bar-center,
+.status-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.status-item .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-dot.green { background: #2DD36F; box-shadow: 0 0 6px rgba(45, 211, 111, 0.5); }
+.status-dot.yellow { background: #F59E0B; box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+.status-dot.red { background: #FF3B30; box-shadow: 0 0 6px rgba(255, 59, 48, 0.5); }
+
+.status-segment-timer {
+    font-family: 'Space Grotesk', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-segment-timer.timer-green { color: #2DD36F; border-color: rgba(45, 211, 111, 0.3); }
+.status-segment-timer.timer-yellow { color: #F59E0B; border-color: rgba(245, 158, 11, 0.3); }
+.status-segment-timer.timer-red { color: #FF3B30; border-color: rgba(255, 59, 48, 0.3); animation: timer-pulse 1s ease infinite; }
+
+@keyframes timer-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.status-overlay-count {
+    background: rgba(232, 101, 10, 0.15);
+    color: #E8650A;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.clear-all-btn {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #FF3B30;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-main);
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.5);
+    box-shadow: 0 0 10px rgba(255, 59, 48, 0.2);
+}
+
+.brb-btn {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #F59E0B;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-main);
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.brb-btn:hover {
+    background: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+/* Visibility toggles — user can show/hide status bar or header pill */
+.status-bar.hidden-bar { display: none; }
+.ws-status-pill.hidden-pill { display: none; }
+
+/* Settings dropdown for status bar config */
+.status-settings-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.status-settings-btn:hover {
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Keyboard shortcut indicator badges */
+.shortcut-hint {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 6px;
+    font-family: 'Space Grotesk', monospace;
+}

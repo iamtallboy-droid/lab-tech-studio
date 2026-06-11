@@ -1,0 +1,42 @@
+/* Module: variables — extracted from dashboard.css */
+
+/* High Fidelity Dashboard Design for Multi-Tenant Broadcast Hub */
+
+/* Theme Variables */
+:root {
+    --transition-speed: 0.25s;
+}
+
+body.show-theme-lab_tech_show {
+    --bg-dark: #080C14;
+    --bg-panel: #0D1420;
+    --bg-overlay: rgba(8, 12, 20, 0.88);
+    --border-color: rgba(0, 194, 255, 0.12);
+    --primary-color: #E8650A;
+    --primary-glow: rgba(232, 101, 10, 0.4);
+    --secondary-color: #F59E0B;
+    --text-color: #FFFFFF;
+    --text-muted: #8B95A8;
+    --accent-red: #FF3B30;
+    --accent-teal: rgba(0, 194, 255, 0.15);
+    --font-main: 'Inter', sans-serif;
+    --font-heading: 'Inter', sans-serif;
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.show-theme-tall_boy_experience {
+    --bg-dark: #060A10;
+    --bg-panel: #0B1018;
+    --bg-overlay: rgba(11, 16, 24, 0.88);
+    --border-color: rgba(0, 194, 255, 0.12);
+    --primary-color: #056004; /* Forest Green */
+    --primary-glow: rgba(5, 96, 4, 0.4);
+    --secondary-color: #4ADE80;
+    --text-color: #FFFFFF;
+    --text-muted: #8B95A8;
+    --accent-red: #FF3B30;
+    --accent-teal: rgba(0, 194, 255, 0.15);
+    --font-main: 'Inter', sans-serif;
+    --font-heading: 'Days One', sans-serif;
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}

@@ -1,0 +1,126 @@
+/* Module: media — extracted from dashboard.css */
+
+/* -------------------------------------------------------------
+   MEDIA MANAGER & TRANSCODER
+   ------------------------------------------------------------- */
+.media-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.transcoder-uploader-box {
+    background-color: var(--bg-panel);
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+}
+
+.file-drop-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+}
+
+.file-drop-area.dragover {
+    background-color: rgba(255,255,255,0.02);
+    border-color: var(--primary-color);
+}
+
+.file-drop-area p {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.transcoder-queue-status {
+    margin-top: 10px;
+}
+
+.transcoder-queue-status h4 {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.queue-row {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.queue-row .job-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.queue-row .job-meta .j-name {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.queue-row .job-meta .j-status-tag {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+}
+
+.queue-row.queued .j-status-tag { background-color: #f59e0b; }
+.queue-row.processing .j-status-tag { background-color: #E8650A; }
+.queue-row.completed .j-status-tag { background-color: #10b981; }
+.queue-row.failed .j-status-tag { background-color: #ef4444; }
+
+.job-progress-container {
+    flex: 1;
+    height: 12px;
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.job-progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.j-pct {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    font-weight: bold;
+    color: white;
+}
+
+.job-url a {
+    color: var(--secondary-color);
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.job-url a:hover {
+    text-decoration: underline;
+}

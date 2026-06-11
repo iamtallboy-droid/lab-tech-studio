@@ -1,0 +1,212 @@
+/* Module: community — extracted from dashboard.css */
+
+/* =============================================================
+   COMMUNITY HUB PANEL
+   ============================================================= */
+.community-hub-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 4px 0;
+}
+
+.community-hub-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+}
+
+.community-hub-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.community-hub-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Status cards grid */
+.community-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.community-stat-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.community-stat-card:hover {
+    border-color: rgba(232, 101, 10, 0.35);
+    box-shadow: 0 0 14px rgba(232, 101, 10, 0.1);
+}
+
+.community-stat-card .stat-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.community-stat-card .stat-value {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    min-height: 20px;
+}
+
+.community-stat-card .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Community sections */
+.community-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.community-section-title {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+/* Client breakdown */
+.client-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.client-type-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.client-count {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.client-type-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-card {
+    border-color: rgba(0, 194, 255, 0.3);
+}
+
+.admin-card .client-count {
+    color: #00C2FF;
+}
+
+.producer-card {
+    border-color: rgba(245, 194, 66, 0.3);
+}
+
+.producer-card .client-count {
+    color: #F5C242;
+}
+
+.viewer-card {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.viewer-card .client-count {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Quick actions */
+.community-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.community-action-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.community-action-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(232, 101, 10, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(232, 101, 10, 0.12);
+}
+
+.community-action-btn:active {
+    transform: translateY(0);
+}
+
+.community-action-btn .action-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.community-action-btn .action-title {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.community-action-btn .action-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+/* Footer */
+.community-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    font-size: 11px;
+    color: var(--text-muted);
+}
