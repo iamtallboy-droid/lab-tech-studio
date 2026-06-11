@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labtechshow Live Stream Overlay Target</title>
+    <link rel="stylesheet" href="overlay.css">
+    <style>
+        /* Custom dynamic inline variables updated by WebSocket coordinates */
+        :root {
+            --primary-color: #0F6FFF;
+            --secondary-color: #00A8FF;
+            --bg-overlay: rgba(7, 11, 25, 0.92);
+            --text-color: #ffffff;
+            
+            --ticker-height: 55px;
+            --ticker-bg-opacity: 0.92;
+            --ticker-font-size: 24px;
+            
+            /* High precision rotator alignment variables */
+            --container-top: 85;
+            --container-left: 5;
+            --image-scale: 1;
+            --text-scale: 1;
+        }
+    </style>
+</head>
+<body class="show-theme-lab_tech_show">
+    
+    <div id="overlay-canvas" class="horizontal-mode">
+        
+        <!-- CAMERA / SCENE GUIDES -->
+        <div id="scene-guides" class="scene-layout-container">
+            <!-- Dynamically populated camera frames -->
+        </div>
+
+        <!-- CALL TO ACTION (CTA) FLY-IN -->
+        <div class="cta-flyin-container">
+            <div id="cta-card" class="cta-flyin-card">
+                <div id="cta-badge" class="cta-badge">SUBSCRIBE</div>
+                <div id="cta-headline" class="cta-headline">Support the Labtechshow</div>
+                <div id="cta-subline" class="cta-subline">Become a channel member today for exclusive perks!</div>
+                <div id="cta-action" class="cta-footer-button">youtube.com/thelabtechshow</div>
+            </div>
+        </div>
+
+        <!-- INFOGRAPHIC FORMULA CALLOUT -->
+        <div id="formula-callout-container" class="formula-callout-container">
+            <div id="formula-card" class="formula-card">
+                <div class="formula-operand" id="formula-left-operand">CONCEPT A</div>
+                <div class="formula-symbol plus-symbol">+</div>
+                <div class="formula-operand" id="formula-right-operand">CONCEPT B</div>
+                <div class="formula-symbol equals-symbol">=</div>
+                <div class="formula-result-panel" id="formula-result-panel">
+                    <span id="formula-result-text">RESULT</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOWER THIRDS OVERLAYS -->
+        <div class="lower-third-container">
+            <div id="lower-third-card" class="lower-third-card">
+                <div class="lt-brand-indicator" id="lt-logo">LT</div>
+                <div class="lt-text-block">
+                    <div id="lt-kicker" class="lt-kicker">LIVE ON AIR</div>
+                    <div id="lt-impact" class="lt-impact-headline">Welcome to The Lab Tech Show</div>
+                    <div id="lt-context" class="lt-context-subline">Here's why this matters to you.</div>
+                    <div id="lt-handle" class="lt-handle">@tallboy</div>
+                </div>
+            </div>
+
+            <!-- Multi-Host dynamic container -->
+            <div id="multi-host-row" class="multi-host-row">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- REAL-TIME FOURTHWALL MERCH ROTATOR OVERLAY -->
+        <div id="merch-rotator-overlay" class="merch-rotator-overlay">
+            <div id="merch-card" class="merch-card-container">
+                <div class="merch-image-box" id="merch-img-box">
+                    <img id="merch-product-image" src="logo.svg" alt="Product Image">
+                </div>
+                <div class="merch-text-box" id="merch-text-box">
+                    <h4 id="merch-product-title">Studio Premium Hoodie</h4>
+                    <div id="merch-product-price" class="merch-price">$54.99</div>
+                    <div class="merch-action-badge">SHOP NOW</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCROLLING TICKER -->
+        <div id="ticker-bar" class="ticker-bar">
+            <!-- Static Block (Logo / Badge / Clock) -->
+            <div class="ticker-header-block">
+                <div id="ticker-badge" class="ticker-badge">LIVE</div>
+                <div id="ticker-logo" class="ticker-logo-lead">LABTECHSHOW</div>
+                <div id="ticker-clock" class="ticker-clock-container">
+                    <span id="clock-time" class="ticker-clock-time">00:00:00</span>
+                    <span id="clock-date" class="ticker-clock-date">JUNE 11, 2026</span>
+                </div>
+            </div>
+
+            <!-- Scrolling Marquee Wrapper -->
+            <div class="ticker-marquee-wrapper">
+                <div id="ticker-marquee" class="ticker-marquee-content">
+                    <!-- Dynamic scrolling text items -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- App State sync script link -->
+    <script src="app.js"></script>
+    <script>
+        let currentPayload = null;
+        let activeProductIndex = 0;
+        let clockTimer = null;
+        let animationFrameId = null;
+        let scrollPos = 0;
+        let marqueeSpeed = 50;
+        let productsList = [];
+
+        // DOM Initializer
+        document.addEventListener('DOMContentLoaded', () => {
+            // Register as viewer overlay screen on the WS Sync port
+            initAppState('viewer');
+            
+            // setup ws listener
+            setupBroadcastReceiver(
+                handleStateUpdate,
+                handleCoordsUpdate,
+                null,
+                null
+            );
+
+            // 8-Second Merch Rotation Carousel
+            startMerchRotation();
+        });
+
+        // Handle incoming WebSocket broadcast
+        function handleStateUpdate(payload) {
+            currentPayload = payload;
+            const config = payload.showConfig;
+            
+            if (!config) return;
+
+            // Apply brand theme styles dynamically
+            document.body.className = `show-theme-${payload.activeShowId}`;
+            
+            const root = document.documentElement;
+            root.style.setProperty('--primary-color', config.primary_hex);
+            root.style.setProperty('--secondary-color', config.secondary_hex);
+            
+            // Adjust body font family dynamically
+            document.body.style.fontFamily = (config.font_family === 'Days One') ? "'Days One', sans-serif" : "'Inter', sans-serif";
+            
+            // Render dynamic branding logo
+            const logoEl = document.getElementById('ticker-logo');
+            logoEl.innerHTML = `<img 
+                src="logo.png" 
+                alt="Lab Tech Show Logo" 
+                onerror="this.onerror=null; this.src='logo.svg';" 
+                style="height:34px; width:auto; object-fit:contain; vertical-align:middle; filter:drop-shadow(0 0 6px rgba(0,168,255,0.5));"
+            >`;
+            
+            // Sync canvas orientation stack styles
+            const mode = getCanvasMode();
+            const canvas = document.getElementById('overlay-canvas');
+            if (mode === 'vertical') {
+                canvas.className = 'vertical-mode';
+            } else {
+                canvas.className = 'horizontal-mode';
+            }
+
+            // Sync layout guides
+            renderCameraGuides(config);
+
+            // Map Lower Thirds
+            renderLowerThirds(payload);
+
+            // Marquee headlines load
+            productsList = payload.productsList || [];
+            
+            // Build scrolling ticker text lines
+            buildMarqueeText(payload);
+
+            // Trigger on-demand initial render
+            renderActiveProduct();
+        }
+
+        function handleCoordsUpdate(payload) {
+            // Sync variables for position alignment
+            const root = document.documentElement;
+            root.style.setProperty('--container-top', payload.containerTop);
+            root.style.setProperty('--container-left', payload.containerLeft);
+            root.style.setProperty('--image-scale', payload.imageScale / 100);
+            root.style.setProperty('--text-scale', payload.textScale / 100);
+        }
+
+        // -------------------------------------------------------------
+        // FOURTHWALL ROTATOR SLIDESHOW (8-SECOND CAROUSEL)
+        // -------------------------------------------------------------
+        function startMerchRotation() {
+            setInterval(() => {
+                if (productsList.length === 0) return;
+                activeProductIndex = (activeProductIndex + 1) % productsList.length;
+                renderActiveProduct();
+            }, 8000); // 8 seconds
+        }
+
+        function renderActiveProduct() {
+            if (productsList.length === 0) return;
+            const prod = productsList[activeProductIndex];
+            if (!prod) return;
+
+            // Fade card content out and in hot (micro-animation transition)
+            const card = document.getElementById('merch-card');
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                document.getElementById('merch-product-image').src = prod.image_url || 'logo.svg';
+                document.getElementById('merch-product-title').textContent = prod.title;
+                document.getElementById('merch-product-price').textContent = prod.price;
+                
+                // Position Inheritance naturally retains custom coordinates values
+                card.style.opacity = '1';
+            }, 300);
+        }
+
+        // -------------------------------------------------------------
+        // SUB COMPONENT RENDERS (GUIDES, TICKER, LT)
+        // -------------------------------------------------------------
+
+        function renderCameraGuides(config) {
+            // Scene cam layout guides placeholder logic
+            const guidesContainer = document.getElementById('scene-guides');
+            guidesContainer.innerHTML = '';
+        }
+
+        function renderLowerThirds(payload) {
+            const activeLt = document.getElementById('lower-third-card');
+            
+            if (payload.activeLowerThird) {
+                // Direct live lower third push from server
+                applyLowerThird(payload.activeLowerThird, activeLt);
+            } else if (payload.activeAiredSegmentId) {
+                api.fetchRundowns(payload.activeShowId).then(segments => {
+                    const seg = segments.find(s => s.segment_id === payload.activeAiredSegmentId);
+                    if (seg) {
+                        applyLowerThird(seg, activeLt);
+                    } else {
+                        hideLowerThird(activeLt);
+                    }
+                });
+            } else {
+                hideLowerThird(activeLt);
+            }
+        }
+
+        function applyLowerThird(data, card) {
+            // "Why should I care?" — impact headline is the hook
+            document.getElementById('lt-kicker').textContent = (data.guest_name ? 'ON AIR GUEST' : 'BREAKING');
+            document.getElementById('lt-impact').textContent = data.impact_headline || data.guest_name || 'The Lab Tech Show';
+            document.getElementById('lt-context').textContent = data.context_subline || data.guest_title || '';
+            document.getElementById('lt-handle').textContent = data.guest_handle || '';
+            
+            card.classList.remove('lt-exit');
+            card.classList.add('active', 'lt-enter');
+            
+            // Remove enter class after animation completes
+            setTimeout(() => card.classList.remove('lt-enter'), 600);
+        }
+
+        function hideLowerThird(card) {
+            if (card.classList.contains('active')) {
+                card.classList.add('lt-exit');
+                setTimeout(() => {
+                    card.classList.remove('active', 'lt-exit');
+                }, 500);
+            }
+        }
+
+        // Live lower third push from WebSocket (bypasses segment lookup)
+        window.onLowerThirdLive = function(data) {
+            const card = document.getElementById('lower-third-card');
+            if (data && data.impact_headline) {
+                applyLowerThird(data, card);
+            } else {
+                hideLowerThird(card);
+            }
+        };
+
+        function buildMarqueeText(payload) {
+            const marquee = document.getElementById('ticker-marquee');
+            marquee.innerHTML = '';
+            
+            // If segment is aired, load custom segment ticker lines
+            if (payload.activeAiredSegmentId) {
+                api.fetchRundowns(payload.activeShowId).then(segments => {
+                    const seg = segments.find(s => s.segment_id === payload.activeAiredSegmentId);
+                    if (seg && seg.ticker_headlines) {
+                        const lines = seg.ticker_headlines.split('\n').filter(l => l.trim().length > 0);
+                        renderTickerItems(lines);
+                    }
+                });
+            } else {
+                // Fallback static items
+                const defaultLines = [
+                    'Welcome to the Live Hub Broadcast',
+                    'Visit our Merch storefront shop.tallboy.us to cop the latest gear',
+                    'Corey "Tall Boy" Sanders & Revis Brown are streaming live'
+                ];
+                renderTickerItems(defaultLines);
+            }
+        }
+
+        function renderTickerItems(lines) {
+            const marquee = document.getElementById('ticker-marquee');
+            marquee.innerHTML = '';
+            
+            lines.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'ticker-item';
+                itemEl.textContent = item.toUpperCase();
+                marquee.appendChild(itemEl);
+
+                // Add Separator dot
+                const sepEl = document.createElement('div');
+                sepEl.className = 'ticker-separator';
+                sepEl.textContent = '•';
+                marquee.appendChild(sepEl);
+            });
+
+            marqueeSpeed = 50;
+            runCustomMarquee();
+        }
+
+        function runCustomMarquee() {
+            const marquee = document.getElementById('ticker-marquee');
+            if (!marquee) return;
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+
+            scrollPos = 0;
+            marquee.style.transform = `translateX(0px)`;
+
+            function step() {
+                const pxPerFrame = (marqueeSpeed / 100) * 3.5;
+                scrollPos -= pxPerFrame;
+
+                const firstItem = marquee.children[0];
+                if (firstItem) {
+                    const resetThreshold = firstItem.offsetWidth + 80;
+                    if (Math.abs(scrollPos) >= resetThreshold) {
+                        scrollPos += resetThreshold;
+                        marquee.appendChild(firstItem);
+                    }
+                }
+
+                marquee.style.transform = `translate3d(${scrollPos}px, 0, 0)`;
+                animationFrameId = requestAnimationFrame(step);
+            }
+
+            animationFrameId = requestAnimationFrame(step);
+        }
+
+        // Live Clock Loop
+        function startClock() {
+            if (clockTimer) clearInterval(clockTimer);
+            
+            const timeEl = document.getElementById('clock-time');
+            const dateEl = document.getElementById('clock-date');
+
+            function updateTime() {
+                const now = new Date();
+                const hrs = String(now.getHours() % 12 || 12).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const secs = String(now.getSeconds()).padStart(2, '0');
+                const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+                timeEl.textContent = `${hrs}:${ampm}`;
+
+                const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                dateEl.textContent = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2,'0')}, ${now.getFullYear()}`;
+            }
+
+            updateTime();
+            clockTimer = setInterval(updateTime, 1000);
+        }
+
+        startClock();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Tenant Broadcast Hub & Production Engine</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Days+One&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="show-theme-lab_tech_show">
+    
+    <!-- BENCH OVERRIDE CRITICAL WARNING BANNER -->
+    <div id="bench-override-banner" class="bench-override-banner">
+        <div class="warning-title">⚠️ BENCH OVERRIDE</div>
+        <div id="warning-msg" class="warning-desc">Primary Admin Host (@IamTallboy) has grabbed priority control. Your concurrent commands were discarded.</div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- MASTER HEADER -->
+        <header>
+            <div class="brand-section">
+                <div class="brand-logo" id="header-logo">LT</div>
+                <div class="brand-title">
+                    <span id="header-show-title">Lab Tech Show</span> 
+                    <span class="hub-label">Broadcast Hub</span>
+                </div>
+            </div>
+            
+            <div class="header-center-actions">
+                <!-- User Sign-in Selection (Authentication Simulation) -->
+                <div class="auth-wrapper">
+                    <label for="user-login-select">ACTIVE OPERATOR:</label>
+                    <select id="user-login-select" class="session-select" onchange="handleAuthChange(this.value)">
+                        <option value="iamtallboy@gmail.com">Corey Sanders (Primary Admin @IamTallboy)</option>
+                        <option value="iamrevisbrown@gmail.com">Revis Brown (Co-Host/Floor General @IamRevisBrown)</option>
+                        <option value="viewer">Viewer / Overlay Viewer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="header-right-actions">
+                <!-- Active Workspace Tenant Selector -->
+                <div class="tenant-wrapper">
+                    <label for="tenant-selector">ACTIVE WORKSPACE:</label>
+                    <select id="tenant-selector" class="session-select" onchange="handleShowChange(this.value)">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <!-- WebSocket Connection Status Pill -->
+                <div id="ws-status-pill" class="ws-status-pill offline" title="WebSocket connection status">
+                    <span class="ws-status-dot"></span>
+                    <span id="ws-status-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <div class="main-wrapper">
+            
+            <!-- LEFT PRESETS SIDEBAR (Admin view controls) -->
+            <aside class="sidebar-pane" id="presets-sidebar">
+                <div class="sidebar-header">
+                    <h3>Workspace Presets</h3>
+                </div>
+                
+                <div class="preset-list" id="preset-list-container">
+                    <!-- Populated dynamically -->
+                </div>
+                
+                <div class="sidebar-footer">
+                    <button class="btn btn-primary btn-sm" onclick="openNewShowWizard()">+ Add New Show</button>
+                    <button class="btn btn-outline btn-sm" onclick="duplicateShow()">Duplicate Active</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteShow()">Delete Show</button>
+                </div>
+            </aside>
+
+            <!-- CENTRAL WORKSPACE -->
+            <main class="workspace-pane">
+                
+                <!-- TOP HEADER TABS -->
+                <nav class="navigation-bar">
+                    <div class="nav-tabs">
+                        <button class="nav-tab active" id="tab-btn-overlays" onclick="switchMainTab('tab-overlays')">Overlays Manager</button>
+                        <button class="nav-tab" id="tab-btn-rundown" onclick="switchMainTab('tab-rundown')">Production Rundown</button>
+                        <button class="nav-tab" id="tab-btn-calendar" onclick="switchMainTab('tab-calendar')">Calendar Planner</button>
+                        <button class="nav-tab" id="tab-btn-brief" onclick="switchMainTab('tab-brief')">Show Briefs</button>
+                        <button class="nav-tab" id="tab-btn-merch" onclick="switchMainTab('tab-merch')">Fourthwall Store</button>
+                        <button class="nav-tab" id="tab-btn-media" onclick="switchMainTab('tab-media')">Media & Transcoder</button>
+                        <button class="nav-tab" id="tab-btn-community" onclick="switchMainTab('tab-community'); loadCommunityStatus();">🛰 Community Hub</button>
+                    </div>
+                    
+                    <div class="current-show-indicator">
+                        <span id="current-show-badge" class="badge">ACTIVE PRESCRIPT: LAB_TECH_SHOW</span>
+                    </div>
+                </nav>
+
+                <!-- TAB PANELS -->
+                <div class="tab-panels-container">
+                    
+                    <!-- TAB 1: OVERLAYS MANAGER -->
+                    <section class="tab-panel active" id="tab-overlays">
+                        <div class="overlays-layout">
+                            
+                            <!-- Controls Form Area -->
+                            <div class="overlay-controls-area">
+                                <div class="subtabs-bar">
+                                    <button class="subtab-btn active" id="sub-btn-ticker" onclick="switchSubTab('sub-ticker')">Scrolling Ticker</button>
+                                    <button class="subtab-btn" id="sub-btn-cta" onclick="switchSubTab('sub-cta')">CTA Fly-In</button>
+                                    <button class="subtab-btn" id="sub-btn-lt" onclick="switchSubTab('sub-lt')">Lower Third</button>
+                                    <button class="subtab-btn" id="sub-btn-cams" onclick="switchSubTab('sub-cams')">Scene / Camera</button>
+                                    <button class="subtab-btn" id="sub-btn-rotator" onclick="switchSubTab('sub-rotator')">Merch Rotator</button>
+                                </div>
+
+                                <div class="subtabs-content-area">
+                                    
+                                    <!-- SUBTAB: SCROLLING TICKER -->
+                                    <div class="sub-panel active" id="sub-ticker">
+                                        <div class="form-section">
+                                            <h4 class="section-title">Ticker Configuration</h4>
+                                            
+                                            <div class="form-group">
+                                                <label>Show Branding Title</label>
+                                                <input type="text" id="brand-title-input" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Primary Brand Font</label>
+                                                <select id="font-family-select" onchange="updateShowSettings()">
+                                                    <option value="Inter">Inter (Lab Tech Show default)</option>
+                                                    <option value="Days One">Days One (Tall Boy default)</option>
+                                                    <option value="Space Grotesk">Space Grotesk (Cyber Tech)</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Brand Palette Colors</label>
+                                                <div class="colors-editor-grid">
+                                                    <div class="color-control">
+                                                        <input type="color" id="primary-color-input" onchange="updateShowSettings()">
+                                                        <span>Primary HEX</span>
+                                                    </div>
+                                                    <div class="color-control">
+                                                        <input type="color" id="secondary-color-input" onchange="updateShowSettings()">
+                                                        <span>Secondary HEX</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-section">
+                                            <h4 class="section-title">Ticker Headlines Manager</h4>
+                                            <div class="form-group">
+                                                <label>Headline List Source</label>
+                                                <div class="toggle-buttons">
+                                                    <button class="toggle-btn active" id="ticker-src-manual" onclick="setTickerSource('manual')">Manual Entries</button>
+                                                    <button class="toggle-btn" id="ticker-src-rss" onclick="setTickerSource('rss')">Live RSS Feeds</button>
+                                                </div>
+                                            </div>
+
+                                            <div id="ticker-manual-entries">
+                                                <label>Manual Headlines (One per line)</label>
+                                                <textarea id="ticker-manual-text" rows="5" placeholder="Enter scrolling items..." onchange="updateShowSettings()"></textarea>
+                                            </div>
+
+                                            <div id="ticker-rss-entries" class="hidden">
+                                                <div class="form-group">
+                                                    <label>Select RSS Feed Source</label>
+                                                    <select id="ticker-rss-feed-select" onchange="handleRssChange(this.value)">
+                                                        <option value="engadget">Engadget Feed</option>
+                                                        <option value="9to5google">9to5Google Feed</option>
+                                                        <option value="techradar">TechRadar Feed</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SUBTAB: CTA FLY-IN -->
+                                    <div class="sub-panel" id="sub-cta">
+                                        <div class="form-section">
+                                            <h4 class="section-title">Call to Action Card</h4>
+                                            
+                                            <div class="form-group check-group">
+                                                <input type="checkbox" id="cta-active-check" onchange="updateShowSettings()">
+                                                <label for="cta-active-check">AIR CTA CARD OVERLAY</label>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Badge Header</label>
+                                                <input type="text" id="cta-badge-input" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Main Title</label>
+                                                <input type="text" id="cta-title-input" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Description Subline</label>
+                                                <textarea id="cta-subline-input" rows="2" onchange="updateShowSettings()"></textarea>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Footer Call / URL</label>
+                                                <input type="text" id="cta-url-input" onchange="updateShowSettings()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SUBTAB: LOWER THIRD -->
+                                    <div class="sub-panel" id="sub-lt">
+                                        <div class="form-section">
+                                            <h4 class="section-title">Dynamic Lower Thirds — "Why Should I Care?" Engine</h4>
+                                            <p class="section-desc" style="margin-bottom:12px; color:rgba(255,255,255,0.6); font-size:12px;">
+                                                The <strong>Impact Headline</strong> is your hook — write it as a benefit, not a fact.<br>
+                                                ❌ "Apple Announces New AI Feature" → ✅ "Apple's AI Can Change Compromised Passwords For You"
+                                            </p>
+
+                                            <div class="form-group check-group">
+                                                <input type="checkbox" id="lt-active-check" onchange="updateShowSettings()">
+                                                <label for="lt-active-check">AIR GUEST LOWER THIRD</label>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Kicker / Show Badge</label>
+                                                <input type="text" id="lt-kicker-input" placeholder="ON AIR GUEST" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label style="color: #F5C242;">★ Impact Headline (Why Should I Care?)</label>
+                                                <input type="text" id="lt-impact-input" placeholder="e.g. Apple's AI Can Change Your Compromised Passwords" onchange="updateShowSettings()" style="border-color: rgba(245,194,66,0.4);">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Context Subline (Supporting Detail)</label>
+                                                <input type="text" id="lt-context-input" placeholder="e.g. New iOS 18 feature rolls out this fall" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Guest Name (for rundown segments)</label>
+                                                <input type="text" id="lt-name-input" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Guest Title / Role</label>
+                                                <input type="text" id="lt-role-input" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Social Handle / Website</label>
+                                                <input type="text" id="lt-handle-input" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-actions" style="margin-top:16px; display:flex; gap:10px;">
+                                                <button class="btn btn-primary" onclick="pushLowerThirdLive()" id="lt-push-live-btn">
+                                                    ▶ PUSH LIVE NOW
+                                                </button>
+                                                <button class="btn btn-outline" onclick="clearLowerThirdLive()">
+                                                    ✕ Clear Overlay
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SUBTAB: SCENE & GUEST CAMERAS -->
+                                    <div class="sub-panel" id="sub-cams">
+                                        <div class="form-section">
+                                            <h4 class="section-title">Camera Slots Alignment</h4>
+
+                                            <div class="form-group check-group">
+                                                <input type="checkbox" id="cam-guides-check" onchange="updateShowSettings()">
+                                                <label for="cam-guides-check">Show Screen Guides overlay</label>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Active Presenter Cam Slots</label>
+                                                <select id="cam-slots-select" onchange="handleCamSlotsChange(this.value)">
+                                                    <option value="1">1 Active Presenter</option>
+                                                    <option value="2">2 Presenters (Side-by-Side)</option>
+                                                    <option value="3">3 Cams (Panel Grid)</option>
+                                                    <option value="4">4 Cams (Quad Grid)</option>
+                                                    <option value="6">6 Cams (Production Room)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-section">
+                                            <h4 class="section-title">Ear-Monitor Audio Bus Gating</h4>
+                                            <p class="section-desc">Mutes guest inputs on program Master Bus while keeping talking feeds live on Guest Bus A.</p>
+                                            
+                                            <div id="audio-gates-cams-container" class="audio-gates-grid">
+                                                <!-- Populated dynamically based on cam slots -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SUBTAB: MERCH ROTATOR OVERLAY POSITION SLIDERS -->
+                                    <div class="sub-panel" id="sub-rotator">
+                                        <div class="form-section">
+                                            <h4 class="section-title">Canvas Mode & Positioning</h4>
+
+                                            <div class="form-group">
+                                                <label>Canvas Mode Ratio</label>
+                                                <div class="toggle-buttons">
+                                                    <button class="toggle-btn active" id="canvas-ratio-horiz" onclick="setCanvasRatio('horizontal')">Horizontal 16:9</button>
+                                                    <button class="toggle-btn" id="canvas-ratio-vert" onclick="setCanvasRatio('vertical')">Vertical 9:16</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Directional Arrows with Granular / Turbo Shift -->
+                                            <div class="directional-pad-section">
+                                                <label>Granular Alignment Pad <span class="pad-sub">(Hold SHIFT for 5% step, click for 1%)</span></label>
+                                                <div class="directional-dpad">
+                                                    <button class="dbtn up" onclick="adjustDirection('up', event)">▲</button>
+                                                    <button class="dbtn left" onclick="adjustDirection('left', event)">◀</button>
+                                                    <button class="dbtn reset" onclick="resetAlignment()">⟲</button>
+                                                    <button class="dbtn right" onclick="adjustDirection('right', event)">▶</button>
+                                                    <button class="dbtn down" onclick="adjustDirection('down', event)">▼</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- High Precision Directional Sliders -->
+                                            <div class="sliders-section">
+                                                <div class="slider-group">
+                                                    <div class="slider-header">
+                                                        <span>Container Top Alignment (Y)</span>
+                                                        <span class="value" id="val-top">85%</span>
+                                                    </div>
+                                                    <div class="slider-controls">
+                                                        <button class="btn-step" onclick="stepSlider('top', -1, event)">-</button>
+                                                        <input type="range" id="slider-top" min="0" max="100" value="85" oninput="handleSliderChange('top', this.value)">
+                                                        <button class="btn-step" onclick="stepSlider('top', 1, event)">+</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slider-group">
+                                                    <div class="slider-header">
+                                                        <span>Container Left Alignment (X)</span>
+                                                        <span class="value" id="val-left">5%</span>
+                                                    </div>
+                                                    <div class="slider-controls">
+                                                        <button class="btn-step" onclick="stepSlider('left', -1, event)">-</button>
+                                                        <input type="range" id="slider-left" min="0" max="100" value="5" oninput="handleSliderChange('left', this.value)">
+                                                        <button class="btn-step" onclick="stepSlider('left', 1, event)">+</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slider-group">
+                                                    <div class="slider-header">
+                                                        <span>Product Image Scale boundary (10-200%)</span>
+                                                        <span class="value" id="val-scale-img">100%</span>
+                                                    </div>
+                                                    <div class="slider-controls">
+                                                        <button class="btn-step" onclick="stepSlider('image_scale', -1, event)">-</button>
+                                                        <input type="range" id="slider-scale-img" min="10" max="200" value="100" oninput="handleSliderChange('image_scale', this.value)">
+                                                        <button class="btn-step" onclick="stepSlider('image_scale', 1, event)">+</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="slider-group">
+                                                    <div class="slider-header">
+                                                        <span>Text Card Scale boundary (10-200%)</span>
+                                                        <span class="value" id="val-scale-text">100%</span>
+                                                    </div>
+                                                    <div class="slider-controls">
+                                                        <button class="btn-step" onclick="stepSlider('text_scale', -1, event)">-</button>
+                                                        <input type="range" id="slider-scale-text" min="10" max="200" value="100" oninput="handleSliderChange('text_scale', this.value)">
+                                                        <button class="btn-step" onclick="stepSlider('text_scale', 1, event)">+</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                            <!-- Real-time HTML preview pane -->
+                            <div class="overlay-preview-area">
+                                <div class="preview-header">
+                                    <span class="title">Overlay Program Canvas Monitor</span>
+                                    <div class="preview-actions">
+                                        <button class="btn btn-secondary btn-sm" onclick="toggleOverlayGuides()">Grid guides</button>
+                                        <button class="btn btn-primary btn-sm" onclick="launchOverlayTarget()">Launch Overlay Window</button>
+                                    </div>
+                                </div>
+                                <div class="preview-frame-container" id="preview-frame-container">
+                                    <iframe id="preview-iframe" src="overlay.html"></iframe>
+                                </div>
+                                <div class="overlay-url-footer">
+                                    <span>VMIX WEB SOURCE BROWSER TARGET PATH:</span>
+                                    <code id="vmix-url-text">http://localhost:7335/overlay.html</code>
+                                    <button class="btn btn-secondary btn-sm" onclick="copyVmixUrl()">Copy</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- TAB 2: PRODUCTION RUNDOWN -->
+                    <section class="tab-panel" id="tab-rundown">
+                        <div class="rundown-layout">
+                            <div class="rundown-info-banner">
+                                <h3>Active Run of Show (Rundown planning)</h3>
+                                <p>Manage sequence timing. Pressing the "AIR SEGMENT" toggle will map lower thirds, ticker headlines, and CTA banners dynamically to the overlay source target.</p>
+                            </div>
+
+                            <!-- Rundown Rows list -->
+                            <div class="rundown-sequences-container" id="rundown-list-container">
+                                <!-- Populated dynamically -->
+                            </div>
+
+                            <div class="rundown-toolbar">
+                                <button class="btn btn-primary" onclick="addNewRundownSegment()">+ Add Rundown Segment</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 3: CALENDAR PLANNER -->
+                    <section class="tab-panel" id="tab-calendar">
+                        <div class="calendar-layout">
+                            <div class="calendar-header">
+                                <h3>Broadcast Schedules Planner</h3>
+                                <button class="btn btn-primary btn-sm" onclick="openAddEventModal()">+ Create Event</button>
+                            </div>
+                            
+                            <!-- Grid Calendar -->
+                            <div class="calendar-grid-container">
+                                <div class="calendar-days-header">
+                                    <span>Sunday</span><span>Monday</span><span>Tuesday</span><span>Wednesday</span><span>Thursday</span><span>Friday</span><span>Saturday</span>
+                                </div>
+                                <div class="calendar-days-grid" id="calendar-grid-cells">
+                                    <!-- Cells populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 4: SHOW BRIEFS -->
+                    <section class="tab-panel" id="tab-brief">
+                        <div class="brief-layout">
+                            <div class="brief-header">
+                                <h3>Interactive Episode Briefs</h3>
+                                <button class="btn btn-primary btn-sm" onclick="openNewBriefModal()">+ Create Episode Brief</button>
+                            </div>
+                            
+                            <div class="brief-split-workspace">
+                                <div class="brief-list-pane" id="brief-list-container">
+                                    <!-- Populated dynamically -->
+                                </div>
+                                
+                                <div class="brief-editor-pane" id="brief-editor-container">
+                                    <div class="no-selection-message">Select an episode brief from the left side to edit.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 5: FOURTHWALL STORE -->
+                    <section class="tab-panel" id="tab-merch">
+                        <div class="merch-layout">
+                            <div class="merch-header-banner">
+                                <h3>Fourthwall Merch Store rotators (`shop.tallboy.us`)</h3>
+                                <p>Authenticate with credentials to scrap items automatically. Manual overrides (slots 5-9) let you pin specific promo lines.</p>
+                            </div>
+                            
+                            <div class="merch-auth-credentials-card">
+                                <h4>OpenAPI Authorization Access</h4>
+                                <div class="credentials-inputs">
+                                    <div class="cinput">
+                                        <label>API Username</label>
+                                        <input type="text" id="fw-username-input" placeholder="Enter API Username...">
+                                    </div>
+                                    <div class="cinput">
+                                        <label>API Password / Token</label>
+                                        <input type="password" id="fw-password-input" placeholder="••••••••••••">
+                                    </div>
+                                    <button class="btn btn-primary" onclick="triggerManualStoreScrape()">On-Demand Scrape</button>
+                                </div>
+                            </div>
+
+                            <div class="selection-pool-section">
+                                <h4>Active 5+5 Selection Pool Roster (Ceiling: 10 items)</h4>
+                                
+                                <div class="pool-layout-split">
+                                    <div class="pool-half">
+                                        <h5>Top 5 Scraped storefront products (Indexes 0-4)</h5>
+                                        <div class="merch-cards-grid" id="scraped-merch-container">
+                                            <!-- Cards populated dynamically -->
+                                        </div>
+                                    </div>
+
+                                    <div class="pool-half">
+                                        <h5>Manual Admin Custom Overrides (Indexes 5-9)</h5>
+                                        <div class="merch-cards-grid" id="override-merch-container">
+                                            <!-- Cards populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 6: MEDIA MANAGER & TRANSCODER -->
+                    <section class="tab-panel" id="tab-media">
+                        <div class="media-layout">
+                            <div class="transcoder-header">
+                                <h3>Asynchronous WebM Video Transcoder Queue</h3>
+                                <p>Upload files up to 300MB. Transcodes them to WebM formats preserving transparency overlays.</p>
+                            </div>
+
+                            <div class="transcoder-uploader-box">
+                                <div class="file-drop-area" id="file-drop-area">
+                                    <p>Drag & Drop media graphics file here, or click to select</p>
+                                    <input type="file" id="transcoder-file-input" style="display:none;" accept="video/*">
+                                    <button class="btn btn-primary" onclick="triggerTranscoderSelect()">Choose Video File</button>
+                                </div>
+                            </div>
+
+                            <div class="transcoder-queue-status">
+                                <h4>Transcoder Encoding Job Queue</h4>
+                                <div class="queue-list" id="transcode-queue-list">
+                                    <div class="empty-list-message">No active encoding jobs currently running.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB: COMMUNITY HUB -->
+                    <section class="tab-panel" id="tab-community">
+                        <div class="community-hub-layout">
+
+                            <div class="community-hub-header">
+                                <h3 class="community-hub-title">🛰 Community Hub — Production Control Center</h3>
+                                <p class="community-hub-desc">Real-time server health, active client monitoring, and quick-fire admin controls.</p>
+                            </div>
+
+                            <!-- STATUS CARDS GRID -->
+                            <div class="community-stats-grid">
+                                <div class="community-stat-card" id="hub-status-card">
+                                    <div class="stat-icon">⚡</div>
+                                    <div class="stat-value" id="hub-server-status">—</div>
+                                    <div class="stat-label">Server Status</div>
+                                </div>
+                                <div class="community-stat-card">
+                                    <div class="stat-icon">⏱</div>
+                                    <div class="stat-value" id="hub-uptime">—</div>
+                                    <div class="stat-label">Server Uptime</div>
+                                </div>
+                                <div class="community-stat-card">
+                                    <div class="stat-icon">👥</div>
+                                    <div class="stat-value" id="hub-client-count">—</div>
+                                    <div class="stat-label">Connected Clients</div>
+                                </div>
+                                <div class="community-stat-card">
+                                    <div class="stat-icon">🔴</div>
+                                    <div class="stat-value" id="hub-redis-status">—</div>
+                                    <div class="stat-label">Redis Cache</div>
+                                </div>
+                                <div class="community-stat-card">
+                                    <div class="stat-icon">🎬</div>
+                                    <div class="stat-value" id="hub-active-show">—</div>
+                                    <div class="stat-label">Active Show</div>
+                                </div>
+                                <div class="community-stat-card">
+                                    <div class="stat-icon">📋</div>
+                                    <div class="stat-value" id="hub-queue-count">—</div>
+                                    <div class="stat-label">Transcoder Queue</div>
+                                </div>
+                            </div>
+
+                            <!-- CLIENT BREAKDOWN -->
+                            <div class="community-section">
+                                <h4 class="community-section-title">Client Breakdown</h4>
+                                <div class="client-breakdown-grid">
+                                    <div class="client-type-card admin-card">
+                                        <div class="client-count" id="hub-admin-count">0</div>
+                                        <div class="client-type-label">Admin Hosts</div>
+                                    </div>
+                                    <div class="client-type-card producer-card">
+                                        <div class="client-count" id="hub-producer-count">0</div>
+                                        <div class="client-type-label">Co-Hosts / Floor</div>
+                                    </div>
+                                    <div class="client-type-card viewer-card">
+                                        <div class="client-count" id="hub-viewer-count">0</div>
+                                        <div class="client-type-label">Overlay Viewers</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QUICK ACTIONS -->
+                            <div class="community-section">
+                                <h4 class="community-section-title">Quick Actions</h4>
+                                <div class="community-actions-grid">
+                                    <button class="community-action-btn" onclick="communityAction('reconnect')">
+                                        <span class="action-icon">🔄</span>
+                                        <span class="action-title">Force Reconnect All</span>
+                                        <span class="action-desc">Send reconnect signal to all connected clients</span>
+                                    </button>
+                                    <button class="community-action-btn" onclick="communityAction('flush-cache')">
+                                        <span class="action-icon">🗑</span>
+                                        <span class="action-title">Flush Redis Cache</span>
+                                        <span class="action-desc">Clear all overlay state cache entries</span>
+                                    </button>
+                                    <button class="community-action-btn" onclick="communityAction('restart-scraper')">
+                                        <span class="action-icon">🔃</span>
+                                        <span class="action-title">Restart Scraper</span>
+                                        <span class="action-desc">Force immediate Fourthwall storefront refresh</span>
+                                    </button>
+                                    <button class="community-action-btn" onclick="loadCommunityStatus()">
+                                        <span class="action-icon">📊</span>
+                                        <span class="action-title">Refresh Stats</span>
+                                        <span class="action-desc">Pull latest server metrics from API</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- LAST UPDATED -->
+                            <div class="community-footer">
+                                <span id="hub-last-updated">Last updated: —</span>
+                                <button class="btn btn-outline btn-sm" onclick="loadCommunityStatus()">↻ Refresh</button>
+                            </div>
+
+                        </div>
+                    </section>
+
+                </div>
+            </main>
+        </div>
+
+        <!-- NEW SHOW WIZARD OVERLAY MODAL -->
+        <div id="new-show-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Create New Show Preset</h3>
+                    <button class="close-btn" onclick="closeNewShowWizard()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Show Preset Name</label>
+                        <input type="text" id="wizard-name-input" placeholder="e.g. The New Tech Daily">
+                    </div>
+                    <div class="form-group">
+                        <label>HEX Primary Theme Color</label>
+                        <input type="color" id="wizard-primary-color" value="#00A8FF">
+                    </div>
+                    <div class="form-group">
+                        <label>HEX Secondary Theme Color</label>
+                        <input type="color" id="wizard-secondary-color" value="#0F6FFF">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Host Social Handles Blocks</label>
+                        <div id="wizard-hosts-container">
+                            <div class="wizard-host-row">
+                                <input type="text" placeholder="Name" class="w-h-name" value="Corey Sanders">
+                                <input type="text" placeholder="Social" class="w-h-social" value="@IamTallboy">
+                                <button class="btn-del-block" onclick="deleteWizardHostRow(this)">&times;</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="addWizardHostRow()">+ Add Host Block</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeNewShowWizard()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitNewShowWizard()">Instantiate Show Row</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALENDAR EVENT MODAL -->
+        <div id="calendar-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Add Calendar Event</h3>
+                    <button class="close-btn" onclick="closeCalendarModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Event Date</label>
+                        <input type="date" id="cal-event-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Event Title</label>
+                        <input type="text" id="cal-event-title" placeholder="Episode #... Recording">
+                    </div>
+                    <div class="form-group">
+                        <label>Description / Notes</label>
+                        <textarea id="cal-event-desc" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeCalendarModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitCalendarEvent()">Save Event</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI Core Logic Linkages -->
+    <script src="app.js"></script>
+    <script>
+        // DOM Loaded Handler
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load app state coordination WebSockets
+            initAppState();
+
+            // Set up state listeners
+            setupBroadcastReceiver(
+                handleStateUpdate,
+                handleCoordsUpdate,
+                handleTranscoderUpdate,
+                handleWarningMessage
+            );
+
+            // Fetch directories
+            let locationUrl = window.location.href;
+            let targetUrl = locationUrl.substring(0, locationUrl.lastIndexOf('/')) + '/overlay.html';
+            document.getElementById('vmix-url-text').textContent = targetUrl;
+            
+            // Wire Drag Drop
+            setupDragAndDrop();
+        });
+
+        // Current UI Local Cache
+        let localState = null;
+        let selectedMainTab = 'tab-overlays';
+        let selectedSubTab = 'sub-ticker';
+        let selectedBriefId = null;
+        let activeCanvasRatio = 'horizontal';
+
+        // -------------------------------------------------------------
+        // BROADCAST STATE HANDLERS (FROM WEBSOCKET)
+        // -------------------------------------------------------------
+        
+        async function handleStateUpdate(payload) {
+            localState = payload;
+            
+            // Re-render preset elements
+            await renderSidebarList();
+            renderTenantOptions();
+
+            // Populate current values in inputs
+            const config = payload.showConfig;
+            if (config) {
+                document.getElementById('brand-title-input').value = config.brand_name || '';
+                document.getElementById('font-family-select').value = config.font_family || 'Inter';
+                document.getElementById('primary-color-input').value = config.primary_hex || '#0F6FFF';
+                document.getElementById('secondary-color-input').value = config.secondary_hex || '#00A8FF';
+                
+                // Adjust body theme selector
+                document.body.className = `show-theme-${payload.activeShowId}`;
+                document.getElementById('current-show-badge').textContent = `ACTIVE PRESET: ${payload.activeShowId.toUpperCase()}`;
+                
+                // Set logo and titles
+                const logoEl = document.getElementById('header-logo');
+                if (payload.activeShowId === 'lab_tech_show') {
+                    logoEl.innerHTML = `<img src="logo.png" alt="Logo" style="height: 28px; width: auto; object-fit: contain; vertical-align: middle;">`;
+                    logoEl.style.background = 'transparent';
+                    logoEl.style.boxShadow = 'none';
+                } else {
+                    logoEl.textContent = (config.brand_name || 'LT').substring(0,2).toUpperCase();
+                    logoEl.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                    logoEl.style.boxShadow = '0 0 12px var(--primary-glow)';
+                }
+                document.getElementById('header-show-title').textContent = config.brand_name || 'Labtechshow';
+            }
+
+            // Sync Coordinates UI Inputs
+            const ratio = getCanvasMode();
+            activeCanvasRatio = ratio;
+            syncRatioButtons();
+            
+            // Render other dynamic UI panels
+            await renderRundownList();
+            await renderCalendarView();
+            await renderBriefsView();
+            renderMerchCards();
+
+            // Reload preview iframe
+            const iframe = document.getElementById('preview-iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage({
+                    type: 'SYNC',
+                    payload: payload
+                }, '*');
+            }
+        }
+
+        function handleCoordsUpdate(payload) {
+            if (payload.showId !== activeShowId) return;
+            
+            // Sync slider inputs
+            document.getElementById('slider-top').value = payload.containerTop;
+            document.getElementById('slider-left').value = payload.containerLeft;
+            document.getElementById('slider-scale-img').value = payload.imageScale;
+            document.getElementById('slider-scale-text').value = payload.textScale;
+
+            document.getElementById('val-top').textContent = `${payload.containerTop}%`;
+            document.getElementById('val-left').textContent = `${payload.containerLeft}%`;
+            document.getElementById('val-scale-img').textContent = `${payload.imageScale}%`;
+            document.getElementById('val-scale-text').textContent = `${payload.textScale}%`;
+
+            // Update preview frame if loaded
+            const iframe = document.getElementById('preview-iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage({
+                    type: 'COORDINATES_SYNC',
+                    payload: payload
+                }, '*');
+            }
+        }
+
+        function handleTranscoderUpdate(jobs) {
+            const container = document.getElementById('transcode-queue-list');
+            if (jobs.length === 0) {
+                container.innerHTML = '<div class="empty-list-message">No active encoding jobs currently running.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            jobs.forEach(job => {
+                const row = document.createElement('div');
+                row.className = `queue-row ${job.status}`;
+                
+                row.innerHTML = `
+                    <div class="job-meta">
+                        <span class="j-name">${job.filename}</span>
+                        <span class="j-status-tag">${job.status.toUpperCase()}</span>
+                    </div>
+                    <div class="job-progress-container">
+                        <div class="job-progress-bar" style="width: ${job.progress}%"></div>
+                        <span class="j-pct">${job.progress}%</span>
+                    </div>
+                    ${job.status === 'completed' ? `<div class="job-url"><a href="${job.url}" target="_blank">Download Transcoded WebM</a></div>` : ''}
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function handleWarningMessage(msg) {
+            const banner = document.getElementById('bench-override-banner');
+            document.getElementById('warning-msg').textContent = msg;
+            banner.classList.add('show');
+            setTimeout(() => {
+                banner.classList.remove('show');
+            }, 4000);
+        }
+
+        // -------------------------------------------------------------
+        // TABS & INTERACTION LOGIC
+        // -------------------------------------------------------------
+
+        function switchMainTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            
+            // Map button IDs
+            const btnId = 'tab-btn-' + tabId.replace('tab-', '');
+            const tabBtn = document.getElementById(btnId);
+            if (tabBtn) tabBtn.classList.add('active');
+            
+            selectedMainTab = tabId;
+            
+            // Trigger load coordinates when overlays tab loads
+            if (tabId === 'tab-overlays') {
+                refreshState();
+            }
+        }
+
+        function switchSubTab(subId) {
+            document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(subId).classList.add('active');
+            
+            const btnId = 'sub-btn-' + subId.replace('sub-', '');
+            const subBtn = document.getElementById(btnId);
+            if (subBtn) subBtn.classList.add('active');
+            
+            selectedSubTab = subId;
+        }
+
+        function syncRatioButtons() {
+            const ratioHoriz = document.getElementById('canvas-ratio-horiz');
+            const ratioVert = document.getElementById('canvas-ratio-vert');
+            const previewViewport = document.getElementById('preview-frame-container');
+
+            ratioHoriz.classList.remove('active');
+            ratioVert.classList.remove('active');
+
+            if (activeCanvasRatio === 'vertical') {
+                ratioVert.classList.add('active');
+                previewViewport.style.width = '320px';
+                previewViewport.style.aspectRatio = '9/16';
+            } else {
+                ratioHoriz.classList.add('active');
+                previewViewport.style.width = '100%';
+                previewViewport.style.aspectRatio = '16/9';
+            }
+            localStorage.setItem('labtech_canvas_mode', activeCanvasRatio);
+        }
+
+        // -------------------------------------------------------------
+        // POSITION ALIGNMENT & GRANULAR / TURBO CONTROLS
+        // -------------------------------------------------------------
+        
+        function handleSliderChange(type, value) {
+            let topVal = parseInt(document.getElementById('slider-top').value);
+            let leftVal = parseInt(document.getElementById('slider-left').value);
+            let imgVal = parseInt(document.getElementById('slider-scale-img').value);
+            let textVal = parseInt(document.getElementById('slider-scale-text').value);
+
+            if (type === 'top') topVal = parseInt(value);
+            if (type === 'left') leftVal = parseInt(value);
+            if (type === 'image_scale') imgVal = parseInt(value);
+            if (type === 'text_scale') textVal = parseInt(value);
+
+            // Apply constraints
+            imgVal = Math.max(10, Math.min(200, imgVal));
+            textVal = Math.max(10, Math.min(200, textVal));
+
+            // Synchronize state
+            updatePositionCoordinates(topVal, leftVal, imgVal, textVal);
+        }
+
+        function stepSlider(type, direction, event) {
+            event.stopPropagation();
+            
+            // Check shift modifier for 5% step vs 1% default step
+            const step = event.shiftKey ? 5 : 1;
+            
+            const sliderId = type === 'top' ? 'slider-top' :
+                             type === 'left' ? 'slider-left' :
+                             type === 'image_scale' ? 'slider-scale-img' : 'slider-scale-text';
+                             
+            const slider = document.getElementById(sliderId);
+            let currentVal = parseInt(slider.value);
+            let newVal = currentVal + (direction * step);
+
+            // Apply constraints
+            if (type === 'image_scale' || type === 'text_scale') {
+                newVal = Math.max(10, Math.min(200, newVal));
+            } else {
+                newVal = Math.max(0, Math.min(100, newVal));
+            }
+
+            slider.value = newVal;
+            handleSliderChange(type, newVal);
+        }
+
+        function adjustDirection(direction, event) {
+            // Arrow click moving canvas container
+            const step = event.shiftKey ? 5 : 1;
+            
+            let topVal = parseInt(document.getElementById('slider-top').value);
+            let leftVal = parseInt(document.getElementById('slider-left').value);
+            
+            if (direction === 'up') topVal = Math.max(0, topVal - step);
+            if (direction === 'down') topVal = Math.min(100, topVal + step);
+            if (direction === 'left') leftVal = Math.max(0, leftVal - step);
+            if (direction === 'right') leftVal = Math.min(100, leftVal + step);
+
+            document.getElementById('slider-top').value = topVal;
+            document.getElementById('slider-left').value = leftVal;
+            
+            handleSliderChange('top', topVal);
+        }
+
+        function resetAlignment() {
+            document.getElementById('slider-top').value = 85;
+            document.getElementById('slider-left').value = 5;
+            document.getElementById('slider-scale-img').value = 100;
+            document.getElementById('slider-scale-text').value = 100;
+
+            updatePositionCoordinates(85, 5, 100, 100);
+        }
+
+        function setCanvasRatio(ratio) {
+            activeCanvasRatio = ratio;
+            syncRatioButtons();
+            
+            // Trigger full reload configuration sync
+            refreshState();
+        }
+
+        // -------------------------------------------------------------
+        // DYNAMIC RENDERING (SIDEBAR, RUNDOWNS, CALENDAR, BRIEFS, PRODUCTS)
+        // -------------------------------------------------------------
+
+        async function renderSidebarList() {
+            const container = document.getElementById('preset-list-container');
+            container.innerHTML = '';
+            
+            const shows = await api.fetchShows();
+            showsList = shows;
+            
+            shows.forEach(show => {
+                const row = document.createElement('div');
+                row.className = `preset-item ${show.show_id === activeShowId ? 'active' : ''}`;
+                row.onclick = () => handleShowChange(show.show_id);
+                
+                row.innerHTML = `
+                    <div class="preset-name">${show.brand_name}</div>
+                    <div class="preset-meta">
+                        <span class="color-dot" style="background-color: ${show.primary_hex}"></span>
+                        <span>Font: ${show.font_family}</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderTenantOptions() {
+            const selector = document.getElementById('tenant-selector');
+            selector.innerHTML = '';
+            showsList.forEach(show => {
+                const opt = document.createElement('option');
+                opt.value = show.show_id;
+                opt.textContent = show.brand_name;
+                opt.selected = show.show_id === activeShowId;
+                selector.appendChild(opt);
+            });
+        }
+
+        async function handleShowChange(showId) {
+            activeShowId = showId;
+            localStorage.setItem('labtech_active_show_id', activeShowId);
+            
+            // Call API backend setter
+            await api.setActiveShow(showId);
+            refreshState();
+        }
+
+        function handleAuthChange(value) {
+            loginUser(value);
+            
+            // Adjust sidebar view rules
+            const sidebar = document.getElementById('presets-sidebar');
+            if (currentRole === 'producer') {
+                sidebar.style.display = 'none';
+                switchMainTab('tab-rundown');
+            } else {
+                sidebar.style.display = 'flex';
+                switchMainTab('tab-overlays');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // NEW SHOW PRESET WIZARD
+        // -------------------------------------------------------------
+        function openNewShowWizard() {
+            document.getElementById('new-show-modal').classList.add('show');
+        }
+
+        function closeNewShowWizard() {
+            document.getElementById('new-show-modal').classList.remove('show');
+        }
+
+        function addWizardHostRow() {
+            const container = document.getElementById('wizard-hosts-container');
+            const row = document.createElement('div');
+            row.className = 'wizard-host-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Name" class="w-h-name">
+                <input type="text" placeholder="Social" class="w-h-social">
+                <button class="btn-del-block" onclick="deleteWizardHostRow(this)">&times;</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function deleteWizardHostRow(btn) {
+            btn.parentElement.remove();
+        }
+
+        async function submitNewShowWizard() {
+            const name = document.getElementById('wizard-name-input').value.trim();
+            const primary = document.getElementById('wizard-primary-color').value;
+            const secondary = document.getElementById('wizard-secondary-color').value;
+            
+            if (!name) {
+                alert('Please enter a Show Name!');
+                return;
+            }
+
+            // Read modular host inputs
+            const hosts = [];
+            const rows = document.querySelectorAll('.wizard-host-row');
+            rows.forEach(row => {
+                const hName = row.querySelector('.w-h-name').value.trim();
+                const hSocial = row.querySelector('.w-h-social').value.trim();
+                if (hName) {
+                    hosts.push({ name: hName, handle: hSocial, role: 'Presenter' });
+                }
+            });
+
+            const showId = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const showData = {
+                show_id: showId,
+                brand_name: name,
+                primary_hex: primary,
+                secondary_hex: secondary,
+                font_family: 'Days One', // baseline inherits typography parameters of The Tall Boy Experience
+                hosts: hosts
+            };
+
+            await api.createShow(showData);
+            closeNewShowWizard();
+            
+            // switch to new show
+            handleShowChange(showId);
+        }
+
+        // -------------------------------------------------------------
+        // NOTION REPLACEMENTS: RUNDOWNS, CALENDAR, SHOW BRIEFS
+        // -------------------------------------------------------------
+        
+        async function renderRundownList() {
+            const container = document.getElementById('rundown-list-container');
+            container.innerHTML = '';
+            
+            const segments = await api.fetchRundowns(activeShowId);
+            
+            // Cam monitoring gate UI build helper
+            buildAudioGatesList(segments);
+
+            if (segments.length === 0) {
+                container.innerHTML = '<div class="no-selection-message">No rundown segments configured. Add one below to start production sequence.</div>';
+                return;
+            }
+
+            segments.forEach((seg, idx) => {
+                const isActive = (seg.segment_id === activeAiredSegmentId);
+                const card = document.createElement('div');
+                card.className = `rundown-segment-card ${isActive ? 'airing' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="seg-header">
+                        <span class="idx">${idx + 1}</span>
+                        <input type="text" class="title-edit" value="${escapeHtml(seg.title)}" onchange="updateSegmentField('${seg.segment_id}', 'title', this.value)">
+                        <div class="actions">
+                            <button class="btn btn-sm ${isActive ? 'btn-danger' : 'btn-primary'}" onclick="toggleSegmentAir('${seg.segment_id}')">
+                                ${isActive ? '● AIRING LIVE' : 'AIR SEGMENT'}
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRundownSegment('${seg.segment_id}')">Delete</button>
+                        </div>
+                    </div>
+                    
+                    <div class="seg-body">
+                        <div class="col">
+                            <div class="form-group-sm">
+                                <label>Guest / Presenter Name</label>
+                                <input type="text" value="${escapeHtml(seg.guest_name || '')}" onchange="updateSegmentField('${seg.segment_id}', 'guest_name', this.value)">
+                            </div>
+                            <div class="form-group-sm">
+                                <label>Guest Title / Role</label>
+                                <input type="text" value="${escapeHtml(seg.guest_title || '')}" onchange="updateSegmentField('${seg.segment_id}', 'guest_title', this.value)">
+                            </div>
+                            <div class="form-group-sm">
+                                <label>Social Handle @</label>
+                                <input type="text" value="${escapeHtml(seg.guest_handle || '')}" onchange="updateSegmentField('${seg.segment_id}', 'guest_handle', this.value)">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group-sm">
+                                <label>Scrolling Ticker Headlines (One per line)</label>
+                                <textarea rows="2" onchange="updateSegmentField('${seg.segment_id}', 'ticker_headlines', this.value)">${escapeHtml(seg.ticker_headlines || '')}</textarea>
+                            </div>
+                            <div class="form-group-sm">
+                                <label>CTA Sponsor Text</label>
+                                <input type="text" value="${escapeHtml(seg.cta_headline || '')}" onchange="updateSegmentField('${seg.segment_id}', 'cta_headline', this.value)">
+                            </div>
+                        </div>
+                        <div class="col flex-notes">
+                            <div class="form-group-sm">
+                                <label>Producer Cue Notes (Internal)</label>
+                                <textarea rows="4" class="p-notes" onchange="updateSegmentField('${seg.segment_id}', 'producer_notes', this.value)">${escapeHtml(seg.producer_notes || '')}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function updateSegmentField(segmentId, field, value) {
+            const segments = await api.fetchRundowns(activeShowId);
+            const seg = segments.find(s => s.segment_id === segmentId);
+            if (seg) {
+                seg[field] = value;
+                await api.saveRundownSegment(activeShowId, seg);
+                
+                // If segment currently airing, trigger coordinates sync updates hot!
+                if (activeAiredSegmentId === segmentId) {
+                    refreshState();
+                }
+            }
+        }
+
+        async function toggleSegmentAir(segmentId) {
+            const nextAired = (activeAiredSegmentId === segmentId) ? null : segmentId;
+            activeAiredSegmentId = nextAired;
+            
+            // Send WebSocket toggle
+            sendWSMessage('AIR_SEGMENT_TOGGLE', { segmentId: nextAired });
+            
+            // Audio Gating Automated networking check:
+            // When layout template drops a guest visually, sever Master but leave Bus A
+            const segments = await api.fetchRundowns(activeShowId);
+            const currentAirSeg = segments.find(s => s.segment_id === segmentId);
+            
+            if (currentAirSeg && currentAirSeg.guest_handle) {
+                const guestName = currentAirSeg.guest_handle.replace('@', '');
+                
+                if (nextAired === segmentId) {
+                    // Airing, unmute
+                    await api.triggerAudioMute(guestName, false);
+                } else {
+                    // Dropped, mute
+                    await api.triggerAudioMute(guestName, true);
+                }
+            }
+            
+            renderRundownList();
+        }
+
+        async function addNewRundownSegment() {
+            const segments = await api.fetchRundowns(activeShowId);
+            const newSeg = {
+                segment_id: `seg-${Date.now()}`,
+                title: `Segment Title #${segments.length + 1}`,
+                guest_name: 'Presenter Name',
+                guest_title: 'Title',
+                guest_handle: '@PresenterSocial',
+                guest_website: '',
+                ticker_headlines: 'Ticker headline item 1...\nTicker headline item 2...',
+                cta_headline: 'CTA Title',
+                cta_subline: '',
+                producer_notes: 'Cues, graphics transitions, ear monitor notes...',
+                sort_order: segments.length
+            };
+            
+            await api.saveRundownSegment(activeShowId, newSeg);
+            await renderRundownList();
+        }
+
+        async function deleteRundownSegment(segId) {
+            if (activeAiredSegmentId === segId) {
+                activeAiredSegmentId = null;
+                sendWSMessage('AIR_SEGMENT_TOGGLE', { segmentId: null });
+            }
+            await api.deleteRundownSegment(activeShowId, segId);
+            await renderRundownList();
+        }
+
+        // Draggable audio bus mutes list
+        function buildAudioGatesList(segments) {
+            const container = document.getElementById('audio-gates-cams-container');
+            container.innerHTML = '';
+            
+            if (segments.length === 0) {
+                container.innerHTML = '<div class="no-selection-message">No guest inputs found in rundown.</div>';
+                return;
+            }
+
+            segments.forEach(seg => {
+                if (!seg.guest_handle) return;
+                const inputName = seg.guest_handle.replace('@','');
+                
+                const card = document.createElement('div');
+                card.className = 'audio-gate-card';
+                card.innerHTML = `
+                    <div class="card-info">
+                        <span class="h-name">${seg.guest_name}</span>
+                        <span class="h-id">Input ID: ${inputName}</span>
+                    </div>
+                    <div class="card-switches">
+                        <button class="btn-toggle-mute active" onclick="toggleLocalBusMute('${inputName}', this)">Master Bus Mute: ON</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function toggleLocalBusMute(guestName, btn) {
+            const isMuted = btn.classList.contains('active');
+            
+            if (isMuted) {
+                btn.classList.remove('active');
+                btn.textContent = 'Master Bus Mute: OFF';
+                await api.triggerAudioMute(guestName, false);
+            } else {
+                btn.classList.add('active');
+                btn.textContent = 'Master Bus Mute: ON';
+                await api.triggerAudioMute(guestName, true);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // CALENDAR PLANNER
+        // -------------------------------------------------------------
+        
+        async function renderCalendarView() {
+            const grid = document.getElementById('calendar-grid-cells');
+            grid.innerHTML = '';
+
+            const events = await api.fetchCalendar(activeShowId);
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth(); // 0-indexed
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Populate empty cells for preceding days
+            for (let i = 0; i < firstDay; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell empty';
+                grid.appendChild(cell);
+            }
+
+            // Populate days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell';
+                
+                const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                
+                cell.innerHTML = `
+                    <span class="day-num">${day}</span>
+                    <div class="events-list" id="events-${dateStr}"></div>
+                `;
+                grid.appendChild(cell);
+            }
+
+            // Bind events
+            events.forEach(evt => {
+                const list = document.getElementById(`events-${evt.event_date}`);
+                if (list) {
+                    const block = document.createElement('div');
+                    block.className = 'event-block';
+                    block.title = evt.description || '';
+                    block.innerHTML = `
+                        <span class="e-title">${escapeHtml(evt.title)}</span>
+                        <button class="e-del" onclick="deleteCalendarEvent('${evt.event_id}', event)">&times;</button>
+                    `;
+                    list.appendChild(block);
+                }
+            });
+        }
+
+        function openAddEventModal() {
+            document.getElementById('calendar-modal').classList.add('show');
+        }
+
+        function closeCalendarModal() {
+            document.getElementById('calendar-modal').classList.remove('show');
+        }
+
+        async function submitCalendarEvent() {
+            const date = document.getElementById('cal-event-date').value;
+            const title = document.getElementById('cal-event-title').value.trim();
+            const desc = document.getElementById('cal-event-desc').value.trim();
+
+            if (!date || !title) {
+                alert('Date and Title are required!');
+                return;
+            }
+
+            const eventData = {
+                event_id: `evt-${Date.now()}`,
+                event_date: date,
+                title: title,
+                description: desc
+            };
+
+            await api.saveCalendarEvent(activeShowId, eventData);
+            closeCalendarModal();
+            renderCalendarView();
+        }
+
+        async function deleteCalendarEvent(id, event) {
+            event.stopPropagation();
+            await api.deleteCalendarEvent(activeShowId, id);
+            renderCalendarView();
+        }
+
+        // -------------------------------------------------------------
+        // EPISODE BRIEFS PLANNER
+        // -------------------------------------------------------------
+        
+        async function renderBriefsView() {
+            const container = document.getElementById('brief-list-container');
+            container.innerHTML = '';
+
+            const briefs = await api.fetchBriefs(activeShowId);
+            
+            if (briefs.length === 0) {
+                container.innerHTML = '<div class="no-selection-message">No briefs compiled. Add one above.</div>';
+                return;
+            }
+
+            briefs.forEach(brief => {
+                const card = document.createElement('div');
+                card.className = `brief-list-card ${selectedBriefId === brief.brief_id ? 'active' : ''}`;
+                card.onclick = () => selectBrief(brief.brief_id);
+                
+                card.innerHTML = `
+                    <div class="b-date">${brief.brief_date}</div>
+                    <div class="b-obj">${escapeHtml(brief.objective || 'General show planning')}</div>
+                `;
+                container.appendChild(card);
+            });
+
+            if (selectedBriefId) {
+                renderBriefEditor();
+            }
+        }
+
+        async function selectBrief(id) {
+            selectedBriefId = id;
+            renderBriefsView();
+        }
+
+        async function openNewBriefModal() {
+            const today = new Date().toISOString().split('T')[0];
+            const briefData = {
+                brief_id: `brief-${Date.now()}`,
+                brief_date: today,
+                objective: 'Episode Planning & Sponsor goals',
+                talking_points: 'Talking point 1...\nTalking point 2...'
+            };
+
+            await api.saveBrief(activeShowId, briefData);
+            selectedBriefId = briefData.brief_id;
+            renderBriefsView();
+        }
+
+        async function renderBriefEditor() {
+            const container = document.getElementById('brief-editor-container');
+            const briefs = await api.fetchBriefs(activeShowId);
+            const brief = briefs.find(b => b.brief_id === selectedBriefId);
+            
+            if (!brief) {
+                container.innerHTML = '<div class="no-selection-message">Select an episode brief from the left side to edit.</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="brief-editor-header">
+                    <h4>Episode Brief: ${brief.brief_date}</h4>
+                    <button class="btn btn-sm btn-danger" onclick="deleteBrief('${brief.brief_id}')">Delete Brief</button>
+                </div>
+                <div class="form-group">
+                    <label>Episode Objective</label>
+                    <input type="text" value="${escapeHtml(brief.objective)}" onchange="updateBriefField('objective', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Key Talking Points (One per line)</label>
+                    <textarea rows="8" onchange="updateBriefField('talking_points', this.value)">${escapeHtml(brief.talking_points)}</textarea>
+                </div>
+            `;
+        }
+
+        async function updateBriefField(field, value) {
+            const briefs = await api.fetchBriefs(activeShowId);
+            const brief = briefs.find(b => b.brief_id === selectedBriefId);
+            if (brief) {
+                brief[field] = value;
+                await api.saveBrief(activeShowId, brief);
+                renderBriefsView();
+            }
+        }
+
+        async function deleteBrief(id) {
+            await api.deleteBrief(activeShowId, id);
+            selectedBriefId = null;
+            renderBriefsView();
+        }
+
+        // -------------------------------------------------------------
+        // FOURTHWALL MERCH SHOP & ROTATORS
+        // -------------------------------------------------------------
+        
+        async function renderMerchCards() {
+            const scrapedContainer = document.getElementById('scraped-merch-container');
+            const overrideContainer = document.getElementById('override-merch-container');
+            
+            scrapedContainer.innerHTML = '';
+            overrideContainer.innerHTML = '';
+
+            const products = await api.fetchProducts(activeShowId);
+            
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = `merch-pool-card ${p.is_evergreen ? 'evergreen' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="m-index">Slot Index ${p.slot_index}</div>
+                    <div class="m-body">
+                        <div class="form-group-sm">
+                            <label>Product Title</label>
+                            <input type="text" value="${escapeHtml(p.title)}" onchange="updateProductField('${p.product_id}', 'title', this.value)">
+                        </div>
+                        <div class="form-group-sm">
+                            <label>Price</label>
+                            <input type="text" value="${escapeHtml(p.price)}" onchange="updateProductField('${p.product_id}', 'price', this.value)">
+                        </div>
+                        <div class="form-group-sm">
+                            <label>Checkout Link</label>
+                            <input type="text" value="${escapeHtml(p.checkout_url)}" onchange="updateProductField('${p.product_id}', 'checkout_url', this.value)">
+                        </div>
+                    </div>
+                `;
+                
+                if (p.slot_index >= 5) {
+                    overrideContainer.appendChild(card);
+                } else {
+                    scrapedContainer.appendChild(card);
+                }
+            });
+        }
+
+        async function updateProductField(prodId, field, value) {
+            const products = await api.fetchProducts(activeShowId);
+            const p = products.find(prod => prod.product_id === prodId);
+            if (p) {
+                p[field] = value;
+                await api.saveProduct(activeShowId, p);
+                renderMerchCards();
+                
+                // Refresh overlay hot update
+                refreshState();
+            }
+        }
+
+        async function triggerManualStoreScrape() {
+            const user = document.getElementById('fw-username-input').value.trim();
+            const pass = document.getElementById('fw-password-input').value;
+            
+            // Display loading indicators
+            alert('Scraping Fourthwall storefront shop.tallboy.us backend API...');
+            
+            const res = await api.triggerScrape(activeShowId, { username: user, password: pass });
+            if (res.success) {
+                alert('Scraping successfully finished! Core items stored.');
+                refreshState();
+            } else {
+                alert('Error completing scrape request.');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // ASYNC TRANSCODER FILE LOADER
+        // -------------------------------------------------------------
+        
+        function setupDragAndDrop() {
+            const dropArea = document.getElementById('file-drop-area');
+            const fileInput = document.getElementById('transcoder-file-input');
+
+            dropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropArea.classList.add('dragover');
+            });
+
+            dropArea.addEventListener('dragleave', () => {
+                dropArea.classList.remove('dragover');
+            });
+
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) handleMediaFileUpload(file);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) handleMediaFileUpload(file);
+            });
+        }
+
+        function triggerTranscoderSelect() {
+            document.getElementById('transcoder-file-input').click();
+        }
+
+        async function handleMediaFileUpload(file) {
+            if (file.size > 300 * 1024 * 1024) {
+                alert('File is too large! Max file size limit is 300MB.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('mediaFile', file);
+            
+            alert(`Uploading ${file.name} to transcoder queue service...`);
+
+            try {
+                const res = await fetch('/api/transcode', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Upload complete! Video queue encoding started.');
+                } else {
+                    alert('Transcode job creation failed.');
+                }
+            } catch (e) {
+                alert('Network upload failed. Ensure server is running.');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // VMIX GRAPHICAL UTILITIES
+        // -------------------------------------------------------------
+        
+        function toggleOverlayGuides() {
+            const check = document.getElementById('cam-guides-check');
+            check.checked = !check.checked;
+            updateShowSettings();
+        }
+
+        function handleCamSlotsChange(val) {
+            updateShowSettings();
+        }
+
+        function launchOverlayTarget() {
+            const targetUrl = document.getElementById('vmix-url-text').textContent;
+            window.open(targetUrl, 'StreamOverlayTarget', 'width=1920,height=1080,menubar=no,toolbar=no,location=no');
+        }
+
+        function copyVmixUrl() {
+            const text = document.getElementById('vmix-url-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Overlay URL path successfully copied!');
+            });
+        }
+
+        async function updateShowSettings() {
+            if (!localState || !localState.showConfig) return;
+            
+            const conf = localState.showConfig;
+            conf.brand_name = document.getElementById('brand-title-input').value;
+            conf.font_family = document.getElementById('font-family-select').value;
+            conf.primary_hex = document.getElementById('primary-color-input').value;
+            conf.secondary_hex = document.getElementById('secondary-color-input').value;
+            
+            // Build segment settings
+            const textVal = document.getElementById('ticker-manual-text').value;
+            
+            // Read active cam slots
+            const slots = parseInt(document.getElementById('cam-slots-select').value);
+            const guides = document.getElementById('cam-guides-check').checked;
+            const ctaActive = document.getElementById('cta-active-check').checked;
+            const ltActive = document.getElementById('lt-active-check').checked;
+
+            // Trigger updates via WebSocket or save directly
+            // In a real database we will save, for sync we dispatch websocket payload
+            await api.createShow(conf);
+            refreshState();
+        }
+
+        function setTickerSource(source) {
+            const manualBtn = document.getElementById('ticker-src-manual');
+            const rssBtn = document.getElementById('ticker-src-rss');
+            const manualText = document.getElementById('ticker-manual-entries');
+            const rssSelect = document.getElementById('ticker-rss-entries');
+
+            manualBtn.classList.remove('active');
+            rssBtn.classList.remove('active');
+
+            if (source === 'rss') {
+                rssBtn.classList.add('active');
+                manualText.classList.add('hidden');
+                rssSelect.classList.remove('hidden');
+            } else {
+                manualBtn.classList.add('active');
+                manualText.classList.remove('hidden');
+                rssSelect.classList.add('hidden');
+            }
+        }
+
+        async function handleRssChange(feed) {
+            alert(`Fetching RSS feed elements for ${feed}...`);
+            // Mock scraper logic in app.js or query server endpoint
+            // Usually server will run RSS parsing. We trigger update on server
+        }
+
+        // HTML escape helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // ================================================================
+        // WEBSOCKET STATUS PILL UPDATER
+        // ================================================================
+        function updateWsPill(connected) {
+            const pill = document.getElementById('ws-status-pill');
+            const text = document.getElementById('ws-status-text');
+            if (!pill || !text) return;
+            if (connected) {
+                pill.className = 'ws-status-pill online';
+                text.textContent = '🟢 Live';
+            } else {
+                pill.className = 'ws-status-pill offline';
+                text.textContent = '🔴 Offline';
+            }
+        }
+
+        // Poll WS status every 2 seconds to update the pill
+        setInterval(() => {
+            const isConnected = typeof socket !== 'undefined' && socket && socket.readyState === WebSocket.OPEN;
+            updateWsPill(isConnected);
+        }, 2000);
+
+        // ================================================================
+        // COMMUNITY HUB FUNCTIONS
+        // ================================================================
+        async function loadCommunityStatus() {
+            const statusData = await api.fetchCommunityStatus();
+
+            // Server status card
+            const statusEl = document.getElementById('hub-server-status');
+            const statusCard = document.getElementById('hub-status-card');
+            if (statusData.status === 'online') {
+                if (statusEl) statusEl.innerHTML = '<span style="color:#2DD36F">● ONLINE</span>';
+                if (statusCard) statusCard.style.borderColor = 'rgba(45,211,111,0.35)';
+            } else {
+                if (statusEl) statusEl.innerHTML = '<span style="color:#FF3B30">● OFFLINE</span>';
+                if (statusCard) statusCard.style.borderColor = 'rgba(255,59,48,0.35)';
+            }
+
+            // Uptime
+            const uptimeEl = document.getElementById('hub-uptime');
+            if (uptimeEl) uptimeEl.textContent = statusData.uptime || '—';
+
+            // Client count
+            const clientEl = document.getElementById('hub-client-count');
+            if (clientEl) clientEl.textContent = statusData.totalClients ?? '—';
+
+            // Redis status
+            const redisEl = document.getElementById('hub-redis-status');
+            if (redisEl && statusData.redis) {
+                redisEl.innerHTML = statusData.redis.mode === 'redis'
+                    ? '<span style="color:#2DD36F">● Redis Connected</span>'
+                    : '<span style="color:#F5C242">● In-Memory</span>';
+            }
+
+            // Active show
+            const showEl = document.getElementById('hub-active-show');
+            if (showEl) showEl.textContent = statusData.activeShowId || '—';
+
+            // Transcoder queue
+            const queueEl = document.getElementById('hub-queue-count');
+            if (queueEl) queueEl.textContent = statusData.transcoderQueue ?? '—';
+
+            // Client breakdown
+            if (statusData.clientBreakdown) {
+                const { admin = 0, producer = 0, viewer = 0 } = statusData.clientBreakdown;
+                document.getElementById('hub-admin-count').textContent = admin;
+                document.getElementById('hub-producer-count').textContent = producer;
+                document.getElementById('hub-viewer-count').textContent = viewer;
+            }
+
+            // Last updated
+            const lastEl = document.getElementById('hub-last-updated');
+            if (lastEl) lastEl.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        }
+
+        async function communityAction(action) {
+            let result;
+            switch(action) {
+                case 'reconnect':
+                    result = await api.reconnectAll();
+                    alert(result.message || 'Reconnect signal sent.');
+                    break;
+                case 'flush-cache':
+                    if (!confirm('Flush all Redis overlay state cache? This will reset position memory for all overlays.')) return;
+                    result = await api.flushCache();
+                    alert(result.message || 'Cache flushed.');
+                    break;
+                case 'restart-scraper':
+                    result = await api.restartScraper(activeShowId);
+                    alert(result.message || 'Scraper restarted.');
+                    break;
+            }
+            setTimeout(loadCommunityStatus, 500);
+        }
+
+        // ================================================================
+        // LOWER THIRD LIVE PUSH FUNCTIONS
+        // ================================================================
+        function pushLowerThirdLive() {
+            const impactHeadline = document.getElementById('lt-impact-input')?.value || '';
+            const contextSubline = document.getElementById('lt-context-input')?.value || '';
+            const kicker = document.getElementById('lt-kicker-input')?.value || 'ON AIR';
+            const guestName = document.getElementById('lt-name-input')?.value || '';
+            const guestTitle = document.getElementById('lt-role-input')?.value || '';
+            const guestHandle = document.getElementById('lt-handle-input')?.value || '';
+
+            if (!impactHeadline && !guestName) {
+                alert('Enter an Impact Headline or Guest Name to push live.');
+                return;
+            }
+
+            sendWSMessage('LOWER_THIRD_UPDATE', {
+                impact_headline: impactHeadline,
+                context_subline: contextSubline,
+                kicker,
+                guest_name: guestName,
+                guest_title: guestTitle,
+                guest_handle: guestHandle
+            });
+
+            // Flash the button to confirm push
+            const btn = document.getElementById('lt-push-live-btn');
+            if (btn) {
+                btn.textContent = '✓ PUSHED LIVE';
+                btn.style.background = '#2DD36F';
+                setTimeout(() => {
+                    btn.textContent = '▶ PUSH LIVE NOW';
+                    btn.style.background = '';
+                }, 2000);
+            }
+        }
+
+        function clearLowerThirdLive() {
+            sendWSMessage('LOWER_THIRD_UPDATE', {
+                impact_headline: '',
+                context_subline: '',
+                kicker: '',
+                guest_name: '',
+                guest_title: '',
+                guest_handle: ''
+            });
+        }
+    </script>
+</body>
+</html>

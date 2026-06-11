@@ -1,0 +1,24 @@
+{
+  "name": "lab-tech-studio-hub",
+  "version": "2.0.0",
+  "description": "Multi-Tenant Broadcast Hub & Production Engine — Phase 2",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop lab-tech-studio-hub",
+    "pm2:restart": "pm2 restart lab-tech-studio-hub",
+    "pm2:logs": "pm2 logs lab-tech-studio-hub"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.3.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.12.0",
+    "sqlite3": "^5.1.7",
+    "ws": "^8.17.0"
+  }
+}

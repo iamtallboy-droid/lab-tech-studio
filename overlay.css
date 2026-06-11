@@ -1,0 +1,433 @@
+/* High Performance Overlay Rendering target Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Days+One&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+    --primary-color: #0F6FFF;
+    --secondary-color: #00A8FF;
+    --bg-overlay: rgba(7, 17, 31, 0.92);
+    --text-color: #ffffff;
+    --border-color: rgba(15, 111, 255, 0.25);
+    
+    --ticker-height: 55px;
+    --ticker-bg-opacity: 0.92;
+    --ticker-font-size: 24px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Master canvas base */
+body, html {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow: hidden;
+    color: var(--text-color);
+}
+
+/* Canvas selector wrappers */
+.horizontal-mode {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vertical-mode {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* -------------------------------------------------------------
+   SCROLLING TICKER
+   ------------------------------------------------------------- */
+.ticker-bar {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: var(--ticker-height);
+    background: rgba(8, 17, 31, var(--ticker-bg-opacity));
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    border-top: 3px solid var(--primary-color);
+    z-index: 100;
+}
+
+.horizontal-mode .ticker-bar {
+    bottom: 0;
+}
+
+.vertical-mode .ticker-bar {
+    bottom: 0;
+}
+
+.ticker-header-block {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    z-index: 10;
+    flex-shrink: 0;
+    background: #030712;
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.4);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ticker-logo-lead {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 100%;
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+}
+
+.ticker-badge {
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+    background: var(--primary-color);
+}
+
+.ticker-clock-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 16px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    height: 100%;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+}
+
+.ticker-clock-time {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.ticker-marquee-wrapper {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.ticker-marquee-content {
+    display: flex;
+    white-space: nowrap;
+    align-items: center;
+    height: 100%;
+    will-change: transform;
+}
+
+.ticker-item {
+    font-size: var(--ticker-font-size);
+    font-weight: 700;
+    margin-right: 60px;
+}
+
+.ticker-separator {
+    color: var(--secondary-color);
+    font-weight: 800;
+    margin-right: 60px;
+}
+
+/* -------------------------------------------------------------
+   LOWER THIRD OVERLAYS
+   ------------------------------------------------------------- */
+.lower-third-container {
+    position: absolute;
+    bottom: 90px;
+    left: 80px;
+    z-index: 90;
+}
+
+.lower-third-card {
+    background: rgba(8, 17, 31, 0.85); /* Primary Overlay BG */
+    border-left: 6px solid var(--primary-color);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 28px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 420px;
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0;
+    will-change: transform;
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.lower-third-card.active {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+}
+
+.lt-brand-indicator {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.lt-text-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.lt-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--secondary-color);
+    letter-spacing: 1px;
+}
+
+.lt-headline {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.lt-subline {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.lt-handle {
+    font-size: 11px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* -------------------------------------------------------------
+   REAL-TIME FOURTHWALL MERCH ROTATOR OVERLAY
+   ------------------------------------------------------------- */
+.merch-rotator-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 120;
+    will-change: transform;
+    pointer-events: none;
+    transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Translate coordinate calculations relative to canvas mode dimensions */
+.horizontal-mode .merch-rotator-overlay {
+    transform: translate3d(calc(var(--container-top) * 1px), calc(var(--container-top) * 1px), 0);
+    /* Bind in-memory calculations */
+    transform: translate3d(calc(var(--container-left) * 19.2px), calc(var(--container-top) * 10.8px), 0);
+}
+
+.vertical-mode .merch-rotator-overlay {
+    transform: translate3d(calc(var(--container-left) * 10.8px), calc(var(--container-top) * 19.2px), 0);
+}
+
+/* Translucent #000814 glass frame (90% Opacity) */
+.merch-card-container {
+    background: rgba(0, 8, 20, 0.9);
+    backdrop-filter: blur(16px);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.65);
+    transition: opacity 0.3s ease;
+    opacity: 1;
+}
+
+/* Declare container context on the cards for cqw scaling */
+.merch-text-box {
+    container-type: inline-size;
+    container-name: textBoxContainer;
+    width: calc(220px * var(--text-scale));
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: width 0.2s ease;
+}
+
+.merch-image-box {
+    width: calc(110px * var(--image-scale));
+    height: calc(110px * var(--image-scale));
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: width 0.2s ease, height 0.2s ease;
+}
+
+.merch-image-box img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+/* Container Queries font-scaling mapping mathematically proportional */
+@container textBoxContainer (min-width: 0px) {
+    #merch-product-title {
+        font-family: inherit;
+        font-size: calc(9cqw + 2px);
+        font-weight: 700;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    
+    #merch-product-price {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: calc(8cqw + 2px);
+        font-weight: 800;
+        color: #F5C242; /* Formula Gold */
+    }
+
+    .merch-action-badge {
+        font-family: inherit;
+        font-size: calc(6cqw + 1px);
+        font-weight: 700;
+        color: white;
+        background: var(--primary-color);
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        width: fit-content;
+        margin-top: 4px;
+    }
+}
+
+/* -------------------------------------------------------------
+   VERTICAL CANVAS MOBILE STACK ALIGNMENT
+   ------------------------------------------------------------- */
+.vertical-mode .merch-card-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+    gap: 14px;
+}
+
+.vertical-mode .merch-image-box {
+    width: calc(160px * var(--image-scale));
+    height: calc(160px * var(--image-scale));
+}
+
+.vertical-mode .merch-text-box {
+    width: calc(260px * var(--text-scale));
+    align-items: center;
+}
+
+/* -------------------------------------------------------------
+   LOWER THIRD — DYNAMIC "WHY SHOULD I CARE?" ENGINE
+   ------------------------------------------------------------- */
+
+/* Slide-in from left */
+@keyframes lt-slide-in {
+    from {
+        transform: translateX(-110%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+}
+
+/* Slide-out to left */
+@keyframes lt-slide-out {
+    from {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-110%);
+        opacity: 0;
+    }
+}
+
+.lower-third-card {
+    /* Default: hidden off-screen left */
+    transform: translateX(-110%);
+    opacity: 0;
+    transition: none;
+}
+
+.lower-third-card.active {
+    transform: translateX(0%);
+    opacity: 1;
+}
+
+.lower-third-card.lt-enter {
+    animation: lt-slide-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.lower-third-card.lt-exit {
+    animation: lt-slide-out 0.45s cubic-bezier(0.55, 0, 0.78, 0) forwards;
+}
+
+/* Impact headline — the "why should I care?" hook */
+.lt-impact-headline {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.15;
+    letter-spacing: -0.3px;
+    text-shadow: 0 1px 8px rgba(0, 168, 255, 0.4);
+    margin-bottom: 2px;
+}
+
+/* Context subline — supporting detail */
+.lt-context-subline {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.3;
+    letter-spacing: 0.1px;
+}
+
+/* Kicker badge stays as show badge */
+.lt-kicker {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--secondary-color);
+    margin-bottom: 4px;
+}
+
+/* Handle line */
+.lt-handle {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-top: 4px;
+}
