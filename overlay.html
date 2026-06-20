@@ -202,8 +202,22 @@
         // -------------------------------------------------------------
         // FOURTHWALL ROTATOR SLIDESHOW (8-SECOND CAROUSEL)
         // -------------------------------------------------------------
+        let featuredProduct = null;
+        let featuredHoldUntil = 0;
+
+        // Spotlight a product pushed from the dashboard's "Feature This NOW".
+        window.onFeatureProduct = function (payload) {
+            if (!payload || !payload.product) return;
+            featuredProduct = payload.product;
+            featuredHoldUntil = Date.now() + 30000; // hold for 30s, then resume rotation
+            renderActiveProduct();
+        };
+
         function startMerchRotation() {
             setInterval(() => {
+                // While a product is featured, hold it and skip rotation.
+                if (featuredProduct && Date.now() < featuredHoldUntil) return;
+                if (featuredProduct) featuredProduct = null; // hold expired — resume
                 if (productsList.length === 0) return;
                 activeProductIndex = (activeProductIndex + 1) % productsList.length;
                 renderActiveProduct();
@@ -211,8 +225,9 @@
         }
 
         function renderActiveProduct() {
-            if (productsList.length === 0) return;
-            const prod = productsList[activeProductIndex];
+            const prod = (featuredProduct && Date.now() < featuredHoldUntil)
+                ? featuredProduct
+                : productsList[activeProductIndex];
             if (!prod) return;
 
             // Fade card content out and in hot (micro-animation transition)

@@ -142,6 +142,12 @@ wss.on('connection', (ws) => {
                     broadcastToAll({ type: 'LOWER_THIRD_LIVE', payload: data.payload });
                     break;
 
+                case 'FEATURE_PRODUCT':
+                    // Spotlight a specific merch product on all overlays
+                    broadcastState.activeFeaturedProduct = data.payload;
+                    broadcastToAll({ type: 'FEATURE_PRODUCT', payload: data.payload });
+                    break;
+
                 case 'FORCE_STATE_REFRESH':
                     sendStateUpdate(ws);
                     break;
@@ -566,9 +572,14 @@ async function startServer() {
     // 2. Initialize Database (PostgreSQL or SQLite fallback)
     await initDb();
 
-    // 3. Start Fourthwall background scrapers
+    // 3. Start Fourthwall background scrapers (sequential initial seed so we
+    //    don't fire 90+ concurrent storefront requests on boot).
     const shows = await db.getShows();
-    shows.forEach(show => startBackgroundScraper(show.show_id));
+    for (const show of shows) {
+        try { await runStorefrontScrape(show.show_id); }
+        catch (err) { console.error(`SCRAPER: initial seed failed for ${show.show_id}:`, err.message); }
+    }
+    shows.forEach(show => startBackgroundScraper(show.show_id, null, null, false));
 
     // 4. Listen
     server.listen(PORT, '127.0.0.1', () => {

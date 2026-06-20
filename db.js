@@ -361,7 +361,13 @@ function seedSqliteDb() {
                               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                               [p.product_id, p.show_id, p.title, p.price, p.image_url, p.checkout_url, p.is_evergreen, p.slot_index]);
             });
-            resolve();
+            // Sentinel: runs last in the serialized queue, so we only resolve
+            // once every seed INSERT above has actually completed. This prevents
+            // getShows() from racing ahead and missing a freshly-seeded show.
+            sqliteDb.get('SELECT 1', (err) => {
+                if (err) return reject(err);
+                resolve();
+            });
         });
     });
 }
@@ -462,6 +468,22 @@ const db = {
             const idx = jsonDbState.products.findIndex(p => p.product_id === product.product_id);
             if (idx !== -1) jsonDbState.products[idx] = { ...product };
             else jsonDbState.products.push({ ...product });
+            saveJsonDb();
+            return Promise.resolve();
+        }
+    },
+    // Remove all products for a show (used before a full catalog refresh so
+    // stale items / slot collisions do not linger).
+    clearProducts: (showId) => {
+        if (dbType === 'postgres') {
+            return pgRun('DELETE FROM products WHERE show_id=$1', [showId]);
+        } else if (dbType === 'sqlite') {
+            return new Promise((resolve, reject) => {
+                sqliteDb.run('DELETE FROM products WHERE show_id = ?', [showId],
+                    (err) => { if (err) return reject(err); resolve(); });
+            });
+        } else {
+            jsonDbState.products = jsonDbState.products.filter(p => p.show_id !== showId);
             saveJsonDb();
             return Promise.resolve();
         }

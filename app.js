@@ -260,6 +260,13 @@ function handleIncomingMessage(msg) {
             }
             break;
 
+        case 'FEATURE_PRODUCT':
+            // Spotlight a specific merch product on the overlay
+            if (typeof window.onFeatureProduct === 'function') {
+                window.onFeatureProduct(msg.payload);
+            }
+            break;
+
         case 'FORCE_RECONNECT':
             console.warn('WS: Server requested force reconnect.');
             if (socket) { socket.close(); }
