@@ -41,25 +41,28 @@
             await renderSidebarList();
             renderTenantOptions();
 
-            // Populate current values in inputs
-            const config = payload.showConfig;
+            // Resolve the ACTIVE show's config. payload.showConfig reflects the
+            // client's registered show, which can lag behind activeShowId — so
+            // look the active show up in showsList. All editor inputs read from
+            // (and updateShowSettings writes to) this active config.
+            const config =
+                (typeof showsList !== 'undefined'
+                    ? showsList.find(s => s.show_id === payload.activeShowId)
+                    : null) || payload.showConfig;
             if (config) {
                 document.getElementById('brand-title-input').value = config.brand_name || '';
                 document.getElementById('font-family-select').value = config.font_family || 'Inter';
                 document.getElementById('primary-color-input').value = config.primary_hex || '#0F6FFF';
                 document.getElementById('secondary-color-input').value = config.secondary_hex || '#00A8FF';
-                
+
+                // Populate ticker style/motion controls from saved overlay settings.
+                populateTickerInputs(config);
+
                 // Adjust body theme selector
                 document.body.className = `show-theme-${payload.activeShowId}`;
                 document.getElementById('current-show-badge').textContent = `ACTIVE PRESET: ${payload.activeShowId.toUpperCase()}`;
-                
-                // Resolve the ACTIVE show's config. payload.showConfig reflects the
-                // client's registered show, which can lag behind activeShowId — so
-                // look the active show up in showsList to keep the header correct.
-                const activeConfig =
-                    (typeof showsList !== 'undefined'
-                        ? showsList.find(s => s.show_id === payload.activeShowId)
-                        : null) || config;
+
+                const activeConfig = config;
 
                 // Set logo and title from the active show's own branding.
                 const logoEl = document.getElementById('header-logo');
@@ -351,26 +354,74 @@
             updateWsPill(isConnected);
         }, 2000);
 
+        // Small helper used by the +/- step buttons on ticker range sliders.
+        function stepTickerRange(id, delta) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const min = parseFloat(el.min), max = parseFloat(el.max);
+            el.value = Math.min(max, Math.max(min, parseFloat(el.value) + delta));
+            el.dispatchEvent(new Event('input'));
+            updateShowSettings();
+        }
+
+        // Populate the ticker editor inputs from a show's saved overlay settings.
+        function populateTickerInputs(config) {
+            const t = (config && config.overlay_settings && config.overlay_settings.ticker) || {};
+            const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
+            const check = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+            const txt = document.getElementById('ticker-manual-text');
+            if (txt && typeof t.manualText === 'string') txt.value = t.manualText;
+            set('ticker-speed', t.speed ?? 60);
+            set('ticker-fontsize', t.fontSize ?? 24);
+            set('ticker-barheight', t.barHeight ?? 55);
+            set('ticker-opacity', Math.round(((t.barOpacity ?? 0.92)) * 100));
+            set('ticker-separator', t.separator || 'dot');
+            set('ticker-badge-text', t.badgeText || 'LIVE');
+            set('ticker-accent-color', t.accentHex || config.secondary_hex || '#00E5FF');
+            check('ticker-uppercase', t.uppercase);
+            check('ticker-badge-on', t.badgeOn !== false);
+            // Sync the slider value readouts.
+            const sync = (id, sel) => { const el = document.getElementById(id), o = document.getElementById(sel); if (el && o) o.textContent = el.value; };
+            sync('ticker-speed', 'val-ticker-speed');
+            sync('ticker-fontsize', 'val-ticker-font');
+            sync('ticker-barheight', 'val-ticker-height');
+            sync('ticker-opacity', 'val-ticker-opacity');
+        }
+
+        function readTickerSettings() {
+            const val = (id) => document.getElementById(id);
+            return {
+                manualText: val('ticker-manual-text') ? val('ticker-manual-text').value : '',
+                source: (val('ticker-src-rss') && val('ticker-src-rss').classList.contains('active')) ? 'rss' : 'manual',
+                speed: parseInt(val('ticker-speed') ? val('ticker-speed').value : 60, 10),
+                fontSize: parseInt(val('ticker-fontsize') ? val('ticker-fontsize').value : 24, 10),
+                barHeight: parseInt(val('ticker-barheight') ? val('ticker-barheight').value : 55, 10),
+                barOpacity: (parseInt(val('ticker-opacity') ? val('ticker-opacity').value : 92, 10)) / 100,
+                uppercase: !!(val('ticker-uppercase') && val('ticker-uppercase').checked),
+                separator: val('ticker-separator') ? val('ticker-separator').value : 'dot',
+                badgeText: val('ticker-badge-text') ? (val('ticker-badge-text').value || 'LIVE') : 'LIVE',
+                badgeOn: val('ticker-badge-on') ? val('ticker-badge-on').checked : true,
+                accentHex: val('ticker-accent-color') ? val('ticker-accent-color').value : '#00E5FF'
+            };
+        }
+
         async function updateShowSettings() {
-            if (!localState || !localState.showConfig) return;
-            
-            const conf = localState.showConfig;
+            // Write to the ACTIVE show's config (resolved from showsList), not the
+            // registered show in localState — those can differ.
+            const conf =
+                (typeof showsList !== 'undefined' ? showsList.find(s => s.show_id === activeShowId) : null)
+                || (localState && localState.showConfig);
+            if (!conf) return;
+
             conf.brand_name = document.getElementById('brand-title-input').value;
             conf.font_family = document.getElementById('font-family-select').value;
             conf.primary_hex = document.getElementById('primary-color-input').value;
             conf.secondary_hex = document.getElementById('secondary-color-input').value;
-            
-            // Build segment settings
-            const textVal = document.getElementById('ticker-manual-text').value;
-            
-            // Read active cam slots
-            const slots = parseInt(document.getElementById('cam-slots-select').value);
-            const guides = document.getElementById('cam-guides-check').checked;
-            const ctaActive = document.getElementById('cta-active-check').checked;
-            const ltActive = document.getElementById('lt-active-check').checked;
 
-            // Trigger updates via WebSocket or save directly
-            // In a real database we will save, for sync we dispatch websocket payload
+            // Merge overlay settings (ticker today; CTA/scene added per sub-tab).
+            conf.overlay_settings = conf.overlay_settings || {};
+            conf.overlay_settings.ticker = readTickerSettings();
+
             await api.createShow(conf);
             refreshState();
         }

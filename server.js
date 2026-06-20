@@ -251,8 +251,9 @@ async function handleCoordinatesUpdate(ws, payload) {
 // SEND FULL STATE TO CLIENT (Redis-first, DB fallback)
 // ================================================================
 async function sendStateUpdate(ws) {
-    const clientInfo = clients.get(ws) || { showId: 'lab_tech_show' };
-    const showId = clientInfo.showId;
+    // Every client (overlay viewers especially) should reflect the ACTIVE show,
+    // so the broadcast follows whatever the admin has on air.
+    const showId = broadcastState.activeShowId || 'lab_tech_show';
 
     try {
         const show = (await db.getShows()).find(s => s.show_id === showId) || { show_id: showId };

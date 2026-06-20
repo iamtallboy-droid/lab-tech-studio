@@ -207,6 +207,95 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- TICKER STYLE & MOTION -->
+                                        <div class="form-section">
+                                            <h4 class="section-title">Ticker Style &amp; Motion</h4>
+
+                                            <div class="form-group check-group">
+                                                <input type="checkbox" id="ticker-badge-on" onchange="updateShowSettings()">
+                                                <label for="ticker-badge-on">Show LIVE badge</label>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>LIVE Badge Text</label>
+                                                <input type="text" id="ticker-badge-text" maxlength="14" placeholder="LIVE" onchange="updateShowSettings()">
+                                            </div>
+
+                                            <div class="form-group check-group">
+                                                <input type="checkbox" id="ticker-uppercase" onchange="updateShowSettings()">
+                                                <label for="ticker-uppercase">UPPERCASE headlines</label>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Separator Between Items</label>
+                                                <select id="ticker-separator" onchange="updateShowSettings()">
+                                                    <option value="dot">• Dot</option>
+                                                    <option value="diamond">◆ Diamond</option>
+                                                    <option value="slash">/ Slash</option>
+                                                    <option value="pipe">| Pipe</option>
+                                                    <option value="star">★ Star</option>
+                                                    <option value="dash">— Dash</option>
+                                                    <option value="arrow">» Arrow</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Accent / Separator Color</label>
+                                                <div class="color-control">
+                                                    <input type="color" id="ticker-accent-color" onchange="updateShowSettings()">
+                                                    <span>Accent HEX</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="slider-group">
+                                                <div class="slider-header">
+                                                    <span>Scroll Speed</span>
+                                                    <span class="value" id="val-ticker-speed">60</span>
+                                                </div>
+                                                <div class="slider-controls">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-speed', -5)">-</button>
+                                                    <input type="range" id="ticker-speed" min="10" max="200" value="60" oninput="document.getElementById('val-ticker-speed').textContent=this.value" onchange="updateShowSettings()">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-speed', 5)">+</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="slider-group">
+                                                <div class="slider-header">
+                                                    <span>Font Size (px)</span>
+                                                    <span class="value" id="val-ticker-font">24</span>
+                                                </div>
+                                                <div class="slider-controls">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-fontsize', -1)">-</button>
+                                                    <input type="range" id="ticker-fontsize" min="12" max="48" value="24" oninput="document.getElementById('val-ticker-font').textContent=this.value" onchange="updateShowSettings()">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-fontsize', 1)">+</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="slider-group">
+                                                <div class="slider-header">
+                                                    <span>Bar Height (px)</span>
+                                                    <span class="value" id="val-ticker-height">55</span>
+                                                </div>
+                                                <div class="slider-controls">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-barheight', -1)">-</button>
+                                                    <input type="range" id="ticker-barheight" min="36" max="110" value="55" oninput="document.getElementById('val-ticker-height').textContent=this.value" onchange="updateShowSettings()">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-barheight', 1)">+</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="slider-group">
+                                                <div class="slider-header">
+                                                    <span>Bar Opacity (%)</span>
+                                                    <span class="value" id="val-ticker-opacity">92</span>
+                                                </div>
+                                                <div class="slider-controls">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-opacity', -2)">-</button>
+                                                    <input type="range" id="ticker-opacity" min="20" max="100" value="92" oninput="document.getElementById('val-ticker-opacity').textContent=this.value" onchange="updateShowSettings()">
+                                                    <button class="btn-step" onclick="stepTickerRange('ticker-opacity', 2)">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- SUBTAB: CTA FLY-IN -->

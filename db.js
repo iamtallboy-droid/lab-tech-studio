@@ -59,11 +59,13 @@ async function createPostgresTables() {
         secondary_hex TEXT NOT NULL,
         accent_hex TEXT,
         logo_url TEXT,
+        overlay_settings TEXT,
         font_family TEXT NOT NULL,
         hosts TEXT NOT NULL
     )`);
     await pgRun(`ALTER TABLE shows ADD COLUMN IF NOT EXISTS accent_hex TEXT`).catch(() => {});
     await pgRun(`ALTER TABLE shows ADD COLUMN IF NOT EXISTS logo_url TEXT`).catch(() => {});
+    await pgRun(`ALTER TABLE shows ADD COLUMN IF NOT EXISTS overlay_settings TEXT`).catch(() => {});
     await pgRun(`CREATE TABLE IF NOT EXISTS products (
         product_id TEXT PRIMARY KEY,
         show_id TEXT NOT NULL,
@@ -122,9 +124,9 @@ async function seedPostgresDb() {
 
     for (const show of DEFAULT_SHOWS) {
         await pgRun(
-            `INSERT INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, font_family, hosts)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (show_id) DO NOTHING`,
-            [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.font_family, show.hosts]
+            `INSERT INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, overlay_settings, font_family, hosts)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (show_id) DO NOTHING`,
+            [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.overlay_settings, show.font_family, show.hosts]
         );
     }
     for (const c of DEFAULT_COORDINATES) {
@@ -161,6 +163,13 @@ const DEFAULT_SHOWS = [
         secondary_hex: '#00E5FF',
         accent_hex: '#0066CC',
         logo_url: 'logo.png',
+        overlay_settings: JSON.stringify({
+            ticker: {
+                manualText: 'Understand the tech, leverage the tech, win with the tech\nNew episode every week — subscribe to keep up\nThe Lab Tech Show — where technology meets opportunity',
+                source: 'manual', speed: 60, fontSize: 24, barHeight: 55, barOpacity: 0.92,
+                uppercase: false, separator: 'dot', badgeText: 'LIVE', badgeOn: true, accentHex: '#00E5FF'
+            }
+        }),
         font_family: 'Inter',
         hosts: JSON.stringify([
             { name: 'Corey "Tall Boy" Sanders', handle: '@IamTallboy', role: 'Host' },
@@ -174,6 +183,13 @@ const DEFAULT_SHOWS = [
         secondary_hex: '#4ADE80',
         accent_hex: '#4ADE80',
         logo_url: 'tbe-logo.svg',
+        overlay_settings: JSON.stringify({
+            ticker: {
+                manualText: 'The Tall Boy Experience — real talk, real culture\nGrab the merch at shop.tallboy.us\nNew drops every week — honk da horn!',
+                source: 'manual', speed: 60, fontSize: 24, barHeight: 55, barOpacity: 0.92,
+                uppercase: false, separator: 'dot', badgeText: 'LIVE', badgeOn: true, accentHex: '#4ADE80'
+            }
+        }),
         font_family: 'Days One',
         hosts: JSON.stringify([
             { name: 'Corey "Tall Boy" Sanders', handle: '@IamTallboy', role: 'Host' },
@@ -279,6 +295,7 @@ function createTables() {
                 secondary_hex TEXT NOT NULL,
                 accent_hex TEXT,
                 logo_url TEXT,
+                overlay_settings TEXT,
                 font_family TEXT NOT NULL,
                 hosts TEXT NOT NULL
             )`, (err) => { if (err) return reject(err); });
@@ -288,6 +305,7 @@ function createTables() {
             // Duplicate-column errors are expected on already-migrated DBs and ignored.
             sqliteDb.run(`ALTER TABLE shows ADD COLUMN accent_hex TEXT`, () => {});
             sqliteDb.run(`ALTER TABLE shows ADD COLUMN logo_url TEXT`, () => {});
+            sqliteDb.run(`ALTER TABLE shows ADD COLUMN overlay_settings TEXT`, () => {});
 
             sqliteDb.run(`CREATE TABLE IF NOT EXISTS products (
                 product_id TEXT PRIMARY KEY,
@@ -359,15 +377,19 @@ function seedSqliteDb() {
         sqliteDb.serialize(() => {
             // Seed Shows
             DEFAULT_SHOWS.forEach((show) => {
-                sqliteDb.run(`INSERT OR IGNORE INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, font_family, hosts)
-                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.font_family, show.hosts]);
+                sqliteDb.run(`INSERT OR IGNORE INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, overlay_settings, font_family, hosts)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.overlay_settings, show.font_family, show.hosts]);
                 // One-time brand sync: bring pre-existing rows up to the correct
                 // palette/logo, but only where not yet branded (logo_url empty),
                 // so user customizations are preserved.
                 sqliteDb.run(`UPDATE shows SET primary_hex=?, secondary_hex=?, accent_hex=?, logo_url=?
                               WHERE show_id=? AND (logo_url IS NULL OR logo_url='')`,
                               [show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.show_id]);
+                // Seed default overlay settings only where none exist yet.
+                sqliteDb.run(`UPDATE shows SET overlay_settings=?
+                              WHERE show_id=? AND (overlay_settings IS NULL OR overlay_settings='')`,
+                              [show.overlay_settings, show.show_id]);
             });
 
             // Seed Coordinates
@@ -402,20 +424,34 @@ const db = {
             return new Promise((resolve, reject) => {
                 sqliteDb.all("SELECT * FROM shows", [], (err, rows) => {
                     if (err) return reject(err);
-                    resolve(rows.map(r => ({ ...r, hosts: JSON.parse(r.hosts) })));
+                    resolve(rows.map(r => ({
+                        ...r,
+                        hosts: JSON.parse(r.hosts),
+                        overlay_settings: r.overlay_settings ? JSON.parse(r.overlay_settings) : {}
+                    })));
                 });
             });
         } else {
-            return Promise.resolve(jsonDbState.shows.map(s => ({ ...s, hosts: JSON.parse(s.hosts) })));
+            return Promise.resolve(jsonDbState.shows.map(s => ({
+                ...s,
+                hosts: JSON.parse(s.hosts),
+                overlay_settings: typeof s.overlay_settings === 'string'
+                    ? (s.overlay_settings ? JSON.parse(s.overlay_settings) : {})
+                    : (s.overlay_settings || {})
+            })));
         }
     },
     saveShow: (show) => {
         const hostsStr = JSON.stringify(show.hosts || []);
+        // overlay_settings may arrive as an object (from the API) or a string.
+        const overlayStr = typeof show.overlay_settings === 'string'
+            ? show.overlay_settings
+            : JSON.stringify(show.overlay_settings || {});
         if (dbType === 'sqlite') {
             return new Promise((resolve, reject) => {
-                sqliteDb.run(`INSERT OR REPLACE INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, font_family, hosts)
-                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex || null, show.logo_url || null, show.font_family, hostsStr],
+                sqliteDb.run(`INSERT OR REPLACE INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, overlay_settings, font_family, hosts)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex || null, show.logo_url || null, overlayStr, show.font_family, hostsStr],
                               (err) => {
                                   if (err) return reject(err);
                                   resolve();
@@ -423,7 +459,7 @@ const db = {
             });
         } else {
             const idx = jsonDbState.shows.findIndex(s => s.show_id === show.show_id);
-            const rawShow = { ...show, hosts: hostsStr };
+            const rawShow = { ...show, hosts: hostsStr, overlay_settings: overlayStr };
             if (idx !== -1) {
                 jsonDbState.shows[idx] = rawShow;
             } else {

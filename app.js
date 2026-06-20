@@ -248,6 +248,13 @@ function handleIncomingMessage(msg) {
             refreshState();
             break;
 
+        case 'SHOWS_UPDATED':
+        case 'PRODUCTS_UPDATED':
+            // A show's branding/overlay settings or product catalog changed —
+            // pull fresh state so overlays + dashboards reflect it live.
+            refreshState();
+            break;
+
         case 'LOWER_THIRD_LIVE':
             // Live lower third update from server — propagate to registered callback
             if (onWarningCallback) {

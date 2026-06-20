@@ -120,6 +120,25 @@
         let animationFrameId = null;
         let scrollPos = 0;
         let marqueeSpeed = 50;
+        let currentTicker = {};
+        const TICKER_SEPARATORS = { dot: '•', diamond: '◆', slash: '/', pipe: '|', star: '★', dash: '—', arrow: '»' };
+
+        // Apply a show's ticker style/motion settings to the overlay chrome.
+        function applyTickerSettings(config) {
+            const t = (config && config.overlay_settings && config.overlay_settings.ticker) || {};
+            currentTicker = t;
+            const root = document.documentElement;
+            if (t.barHeight) root.style.setProperty('--ticker-height', t.barHeight + 'px');
+            if (t.fontSize) root.style.setProperty('--ticker-font-size', t.fontSize + 'px');
+            if (t.barOpacity != null) root.style.setProperty('--ticker-bg-opacity', t.barOpacity);
+            const accent = t.accentHex || (config && config.secondary_hex) || (config && config.accent_hex) || '#00E5FF';
+            root.style.setProperty('--ticker-accent', accent);
+            const badge = document.getElementById('ticker-badge');
+            if (badge) {
+                badge.textContent = t.badgeText || 'LIVE';
+                badge.style.display = (t.badgeOn === false) ? 'none' : '';
+            }
+        }
         // NOTE: productsList is declared globally in app.js (loaded above). The
         // FULL_STATE handler there keeps it in sync, and this overlay reads/writes
         // that same global. Re-declaring it here with `let` would throw a global
@@ -201,7 +220,8 @@
             // Marquee headlines load
             productsList = payload.productsList || [];
             
-            // Build scrolling ticker text lines
+            // Apply ticker style/motion, then build the scrolling text
+            applyTickerSettings(config);
             buildMarqueeText(payload);
 
             // Trigger on-demand initial render
@@ -339,34 +359,40 @@
                     }
                 });
             } else {
-                // Fallback static items
+                // Use the show's own ticker headlines (from the dashboard); fall
+                // back to generic lines only if none are configured.
+                const manual = (currentTicker && currentTicker.manualText) || '';
+                const lines = manual.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                 const defaultLines = [
                     'Welcome to the Live Hub Broadcast',
                     'Visit our Merch storefront shop.tallboy.us to cop the latest gear',
                     'Corey "Tall Boy" Sanders & Revis Brown are streaming live'
                 ];
-                renderTickerItems(defaultLines);
+                renderTickerItems(lines.length ? lines : defaultLines);
             }
         }
 
         function renderTickerItems(lines) {
             const marquee = document.getElementById('ticker-marquee');
             marquee.innerHTML = '';
-            
-            lines.forEach((item, index) => {
+
+            const upper = !!(currentTicker && currentTicker.uppercase);
+            const sepChar = TICKER_SEPARATORS[(currentTicker && currentTicker.separator) || 'dot'] || '•';
+
+            lines.forEach((item) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'ticker-item';
-                itemEl.textContent = item.toUpperCase();
+                itemEl.textContent = upper ? item.toUpperCase() : item;
                 marquee.appendChild(itemEl);
 
-                // Add Separator dot
                 const sepEl = document.createElement('div');
                 sepEl.className = 'ticker-separator';
-                sepEl.textContent = '•';
+                sepEl.textContent = sepChar;
+                sepEl.style.color = 'var(--ticker-accent, #00E5FF)';
                 marquee.appendChild(sepEl);
             });
 
-            marqueeSpeed = 50;
+            marqueeSpeed = (currentTicker && currentTicker.speed) || 50;
             runCustomMarquee();
         }
 
