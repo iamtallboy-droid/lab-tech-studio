@@ -274,6 +274,13 @@ function handleIncomingMessage(msg) {
             }
             break;
 
+        case 'CTA_FLYIN':
+            // Fly a CTA card in (or hide it) on the overlay
+            if (typeof window.onCtaFlyIn === 'function') {
+                window.onCtaFlyIn(msg.payload);
+            }
+            break;
+
         case 'FORCE_RECONNECT':
             console.warn('WS: Server requested force reconnect.');
             if (socket) { socket.close(); }

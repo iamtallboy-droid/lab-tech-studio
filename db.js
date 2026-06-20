@@ -168,6 +168,11 @@ const DEFAULT_SHOWS = [
                 manualText: 'Understand the tech, leverage the tech, win with the tech\nNew episode every week — subscribe to keep up\nThe Lab Tech Show — where technology meets opportunity',
                 source: 'manual', speed: 60, fontSize: 24, barHeight: 55, barOpacity: 0.92,
                 uppercase: false, separator: 'dot', badgeText: 'LIVE', badgeOn: true, accentHex: '#00E5FF'
+            },
+            cta: {
+                active: false, badge: 'SUBSCRIBE', title: 'Subscribe to The Lab Tech Show',
+                subline: 'New episodes every week — never miss a drop.', url: 'youtube.com/thelabtechshow',
+                style: 'glow', autoHideSec: 12
             }
         }),
         font_family: 'Inter',
@@ -188,6 +193,11 @@ const DEFAULT_SHOWS = [
                 manualText: 'The Tall Boy Experience — real talk, real culture\nGrab the merch at shop.tallboy.us\nNew drops every week — honk da horn!',
                 source: 'manual', speed: 60, fontSize: 24, barHeight: 55, barOpacity: 0.92,
                 uppercase: false, separator: 'dot', badgeText: 'LIVE', badgeOn: true, accentHex: '#4ADE80'
+            },
+            cta: {
+                active: false, badge: 'SUBSCRIBE', title: 'Join The Tall Boy Experience',
+                subline: 'Real talk, real culture — hit subscribe & grab the merch.', url: 'tallboy.us',
+                style: 'glow', autoHideSec: 12
             }
         }),
         font_family: 'Days One',

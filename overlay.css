@@ -431,3 +431,112 @@ body, html {
     color: var(--primary-color);
     margin-top: 4px;
 }
+
+/* -------------------------------------------------------------
+   CTA FLY-IN CARD  (responsive: anchored + animated per orientation)
+   ------------------------------------------------------------- */
+.cta-flyin-container {
+    position: absolute;
+    z-index: 120;
+    pointer-events: none;
+}
+
+/* Horizontal (16:9): lower-right, flies in from the right edge. */
+.horizontal-mode .cta-flyin-container {
+    right: 48px;
+    bottom: calc(var(--ticker-height) + 48px);
+    width: 480px;
+}
+.horizontal-mode .cta-flyin-card {
+    transform: translateX(140%);
+}
+
+/* Vertical (9:16): centered, lifted clear of the ticker, flies up from below. */
+.vertical-mode .cta-flyin-container {
+    left: 50%;
+    bottom: calc(var(--ticker-height) + 220px);
+    width: 78%;
+    transform: translateX(-50%);
+}
+.vertical-mode .cta-flyin-card {
+    transform: translateY(160%);
+}
+
+/* Card shell — branded glass panel */
+.cta-flyin-card {
+    background: linear-gradient(155deg, rgba(13, 17, 23, 0.94), rgba(8, 16, 24, 0.94));
+    border: 1px solid color-mix(in srgb, var(--secondary-color) 55%, transparent);
+    border-left: 5px solid var(--primary-color);
+    border-radius: 14px;
+    padding: 22px 24px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55),
+                0 0 28px color-mix(in srgb, var(--secondary-color) 28%, transparent);
+    opacity: 0;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    will-change: transform, opacity;
+}
+
+/* Visible state — slides to anchor */
+.cta-flyin-container.cta-visible .cta-flyin-card {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+}
+
+.cta-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #00121a;
+    background: var(--secondary-color);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--secondary-color) 60%, transparent);
+}
+
+.cta-headline {
+    margin-top: 12px;
+    font-family: var(--font-heading, 'Inter');
+    font-weight: 800;
+    font-size: 30px;
+    line-height: 1.12;
+    color: #ffffff;
+}
+
+.cta-subline {
+    margin-top: 8px;
+    font-size: 17px;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.cta-footer-button {
+    margin-top: 16px;
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 16px;
+    color: #ffffff;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    box-shadow: 0 0 18px color-mix(in srgb, var(--primary-color) 45%, transparent);
+}
+
+/* Style presets (set via cta.style) */
+.cta-flyin-card.cta-style-minimal {
+    background: rgba(8, 16, 24, 0.86);
+    border-left-width: 3px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+.cta-flyin-card.cta-style-minimal .cta-footer-button { background: transparent; border: 1px solid var(--secondary-color); }
+.cta-flyin-card.cta-style-glow {
+    border-color: var(--secondary-color);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55),
+                0 0 42px color-mix(in srgb, var(--secondary-color) 55%, transparent);
+}
+
+/* Vertical scales the card up a touch for the taller canvas */
+.vertical-mode .cta-headline { font-size: 38px; }
+.vertical-mode .cta-subline { font-size: 21px; }

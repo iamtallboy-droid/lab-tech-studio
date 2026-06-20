@@ -35,7 +35,7 @@
         </div>
 
         <!-- CALL TO ACTION (CTA) FLY-IN -->
-        <div class="cta-flyin-container">
+        <div id="cta-container" class="cta-flyin-container">
             <div id="cta-card" class="cta-flyin-card">
                 <div id="cta-badge" class="cta-badge">SUBSCRIBE</div>
                 <div id="cta-headline" class="cta-headline">Support the Labtechshow</div>
@@ -139,6 +139,71 @@
                 badge.style.display = (t.badgeOn === false) ? 'none' : '';
             }
         }
+
+        // ---- CTA Fly-In -------------------------------------------------
+        let currentCta = {};
+        let ctaHideTimer = null;
+
+        // Apply a show's CTA content/style and reflect its active state.
+        // Position + fly-in direction are handled by the orientation CSS
+        // (lower-right + slide-from-right horizontally; centered + slide-up
+        // vertically), so the same card stays clean in both formats.
+        function applyCtaSettings(config) {
+            const c = (config && config.overlay_settings && config.overlay_settings.cta) || {};
+            currentCta = c;
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            set('cta-badge', c.badge || 'SUBSCRIBE');
+            set('cta-headline', c.title || '');
+            set('cta-subline', c.subline || '');
+            set('cta-action', c.url || '');
+
+            const card = document.getElementById('cta-card');
+            if (card) {
+                card.classList.remove('cta-style-standard', 'cta-style-minimal', 'cta-style-glow');
+                card.classList.add('cta-style-' + (c.style || 'standard'));
+            }
+
+            // Honor the saved "AIR CTA" toggle on state sync.
+            if (c.active) showCtaFlyIn(c.autoHideSec);
+            else hideCtaFlyIn();
+        }
+
+        function showCtaFlyIn(autoHideSec) {
+            const cont = document.getElementById('cta-container');
+            if (!cont) return;
+            cont.classList.add('cta-visible');
+            if (ctaHideTimer) { clearTimeout(ctaHideTimer); ctaHideTimer = null; }
+            const secs = parseFloat(autoHideSec != null ? autoHideSec : currentCta.autoHideSec);
+            if (secs && secs > 0) {
+                ctaHideTimer = setTimeout(hideCtaFlyIn, secs * 1000);
+            }
+        }
+
+        function hideCtaFlyIn() {
+            const cont = document.getElementById('cta-container');
+            if (cont) cont.classList.remove('cta-visible');
+            if (ctaHideTimer) { clearTimeout(ctaHideTimer); ctaHideTimer = null; }
+        }
+
+        // Dashboard "FLY IN NOW" trigger.
+        window.onCtaFlyIn = function (payload) {
+            if (payload && payload.cta) {
+                // Live content override without needing a full state refresh.
+                currentCta = Object.assign({}, currentCta, payload.cta);
+                const set = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.textContent = v; };
+                set('cta-badge', currentCta.badge);
+                set('cta-headline', currentCta.title);
+                set('cta-subline', currentCta.subline);
+                set('cta-action', currentCta.url);
+                const card = document.getElementById('cta-card');
+                if (card && currentCta.style) {
+                    card.classList.remove('cta-style-standard', 'cta-style-minimal', 'cta-style-glow');
+                    card.classList.add('cta-style-' + currentCta.style);
+                }
+            }
+            if (payload && payload.action === 'hide') hideCtaFlyIn();
+            else showCtaFlyIn(payload && payload.autoHideSec);
+        };
         // NOTE: productsList is declared globally in app.js (loaded above). The
         // FULL_STATE handler there keeps it in sync, and this overlay reads/writes
         // that same global. Re-declaring it here with `let` would throw a global
@@ -223,6 +288,9 @@
             // Apply ticker style/motion, then build the scrolling text
             applyTickerSettings(config);
             buildMarqueeText(payload);
+
+            // Apply CTA content/style/active-state
+            applyCtaSettings(config);
 
             // Trigger on-demand initial render
             renderActiveProduct();

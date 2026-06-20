@@ -148,6 +148,11 @@ wss.on('connection', (ws) => {
                     broadcastToAll({ type: 'FEATURE_PRODUCT', payload: data.payload });
                     break;
 
+                case 'CTA_FLYIN':
+                    // Fly a CTA card in (or hide it) on all overlays
+                    broadcastToAll({ type: 'CTA_FLYIN', payload: data.payload });
+                    break;
+
                 case 'FORCE_STATE_REFRESH':
                     sendStateUpdate(ws);
                     break;

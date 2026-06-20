@@ -55,8 +55,9 @@
                 document.getElementById('primary-color-input').value = config.primary_hex || '#0F6FFF';
                 document.getElementById('secondary-color-input').value = config.secondary_hex || '#00A8FF';
 
-                // Populate ticker style/motion controls from saved overlay settings.
+                // Populate ticker + CTA controls from saved overlay settings.
                 populateTickerInputs(config);
+                populateCtaInputs(config);
 
                 // Adjust body theme selector
                 document.body.className = `show-theme-${payload.activeShowId}`;
@@ -418,12 +419,50 @@
             conf.primary_hex = document.getElementById('primary-color-input').value;
             conf.secondary_hex = document.getElementById('secondary-color-input').value;
 
-            // Merge overlay settings (ticker today; CTA/scene added per sub-tab).
+            // Merge overlay settings (ticker + CTA; scene added later).
             conf.overlay_settings = conf.overlay_settings || {};
             conf.overlay_settings.ticker = readTickerSettings();
+            conf.overlay_settings.cta = readCtaSettings();
 
             await api.createShow(conf);
             refreshState();
+        }
+
+        function readCtaSettings() {
+            const v = (id) => document.getElementById(id);
+            return {
+                active: !!(v('cta-active-check') && v('cta-active-check').checked),
+                badge: v('cta-badge-input') ? v('cta-badge-input').value : 'SUBSCRIBE',
+                title: v('cta-title-input') ? v('cta-title-input').value : '',
+                subline: v('cta-subline-input') ? v('cta-subline-input').value : '',
+                url: v('cta-url-input') ? v('cta-url-input').value : '',
+                style: v('cta-style-select') ? v('cta-style-select').value : 'standard',
+                autoHideSec: v('cta-autohide-input') ? parseInt(v('cta-autohide-input').value || '0', 10) : 12
+            };
+        }
+
+        function populateCtaInputs(config) {
+            const c = (config && config.overlay_settings && config.overlay_settings.cta) || {};
+            const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
+            const check = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+            check('cta-active-check', c.active);
+            set('cta-badge-input', c.badge || 'SUBSCRIBE');
+            set('cta-title-input', c.title || '');
+            set('cta-subline-input', c.subline || '');
+            set('cta-url-input', c.url || '');
+            set('cta-style-select', c.style || 'standard');
+            set('cta-autohide-input', c.autoHideSec != null ? c.autoHideSec : 12);
+        }
+
+        // Push the active show's CTA to the overlay immediately (fly in / hide).
+        function triggerCtaFlyIn() {
+            const cta = readCtaSettings();
+            sendWSMessage('CTA_FLYIN', { showId: activeShowId, cta, autoHideSec: cta.autoHideSec });
+            showToast('▶ CTA flying in on overlay', 'success');
+        }
+        function triggerCtaHide() {
+            sendWSMessage('CTA_FLYIN', { showId: activeShowId, action: 'hide' });
+            showToast('CTA hidden', 'success');
         }
 
         // HTML escape helper
