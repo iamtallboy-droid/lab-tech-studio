@@ -17,9 +17,11 @@
             --ticker-bg-opacity: 0.92;
             --ticker-font-size: 24px;
             
-            /* High precision rotator alignment variables */
-            --container-top: 85;
-            --container-left: 5;
+            /* High precision rotator alignment variables.
+               Default merch position = right / upper-mid, clear of the
+               lower-third (lower-left) so the two zones don't mesh. */
+            --container-top: 30;
+            --container-left: 68;
             --image-scale: 1;
             --text-scale: 1;
         }
@@ -355,9 +357,30 @@
         // -------------------------------------------------------------
 
         function renderCameraGuides(config) {
-            // Scene cam layout guides placeholder logic
             const guidesContainer = document.getElementById('scene-guides');
             guidesContainer.innerHTML = '';
+            const scene = (config && config.overlay_settings && config.overlay_settings.scene) || {};
+            if (!scene.guides) { guidesContainer.style.display = 'none'; return; }
+            guidesContainer.style.display = 'grid';
+
+            const slots = parseInt(scene.camSlots || 1, 10);
+            const cols = slots === 1 ? 1 : slots === 2 ? 2 : slots === 3 ? 3 : slots === 4 ? 2 : slots === 6 ? 3 : Math.ceil(Math.sqrt(slots));
+            const rows = Math.ceil(slots / cols);
+            guidesContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            guidesContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+            for (let i = 1; i <= slots; i++) {
+                const frame = document.createElement('div');
+                frame.className = 'cam-guide-frame';
+                frame.innerHTML = `<span class="cam-guide-label">CAM ${i}</span>`;
+                guidesContainer.appendChild(frame);
+            }
+            if (scene.sharedUrl) {
+                const badge = document.createElement('div');
+                badge.className = 'scene-shared-badge';
+                badge.textContent = 'SHARED: ' + scene.sharedUrl;
+                guidesContainer.appendChild(badge);
+            }
         }
 
         function renderLowerThirds(payload) {

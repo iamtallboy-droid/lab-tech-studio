@@ -55,10 +55,11 @@
                 document.getElementById('primary-color-input').value = config.primary_hex || '#0F6FFF';
                 document.getElementById('secondary-color-input').value = config.secondary_hex || '#00A8FF';
 
-                // Populate ticker + CTA + lower-third controls from saved settings.
+                // Populate ticker + CTA + lower-third + scene controls.
                 populateTickerInputs(config);
                 populateCtaInputs(config);
                 populateLtInputs(config);
+                populateSceneInputs(config);
 
                 // Adjust body theme selector
                 document.body.className = `show-theme-${payload.activeShowId}`;
@@ -420,11 +421,12 @@
             conf.primary_hex = document.getElementById('primary-color-input').value;
             conf.secondary_hex = document.getElementById('secondary-color-input').value;
 
-            // Merge overlay settings (ticker + CTA + lower-third defaults).
+            // Merge overlay settings (ticker + CTA + lower-third + scene).
             conf.overlay_settings = conf.overlay_settings || {};
             conf.overlay_settings.ticker = readTickerSettings();
             conf.overlay_settings.cta = readCtaSettings();
             conf.overlay_settings.lt = readLtSettings();
+            conf.overlay_settings.scene = readSceneSettings();
 
             await api.createShow(conf);
             refreshState();
@@ -472,6 +474,23 @@
             set('lt-style-select', lt.style || 'standard');
             if (lt.kicker) set('lt-kicker-input', lt.kicker);
             const chk = document.getElementById('lt-active-check'); if (chk) chk.checked = !!lt.active;
+        }
+
+        // Scene / Camera per-show settings (cam-slot guides + shared URL).
+        function readSceneSettings() {
+            const v = (id) => document.getElementById(id);
+            return {
+                camSlots: v('cam-slots-select') ? parseInt(v('cam-slots-select').value, 10) : 2,
+                guides: !!(v('cam-guides-check') && v('cam-guides-check').checked),
+                sharedUrl: v('scene-shared-url') ? v('scene-shared-url').value.trim() : ''
+            };
+        }
+        function populateSceneInputs(config) {
+            const sc = (config && config.overlay_settings && config.overlay_settings.scene) || {};
+            const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
+            set('cam-slots-select', sc.camSlots || 2);
+            set('scene-shared-url', sc.sharedUrl || '');
+            const chk = document.getElementById('cam-guides-check'); if (chk) chk.checked = !!sc.guides;
         }
 
         // Push the active show's CTA to the overlay immediately (fly in / hide).

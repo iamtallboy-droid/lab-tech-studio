@@ -174,7 +174,8 @@ const DEFAULT_SHOWS = [
                 subline: 'New episodes every week — never miss a drop.', url: 'youtube.com/thelabtechshow',
                 style: 'glow', autoHideSec: 12
             },
-            lt: { style: 'standard', kicker: 'ON AIR GUEST', active: false }
+            lt: { style: 'standard', kicker: 'ON AIR GUEST', active: false },
+            scene: { camSlots: 2, guides: false, sharedUrl: '' }
         }),
         font_family: 'Inter',
         hosts: JSON.stringify([
@@ -200,7 +201,8 @@ const DEFAULT_SHOWS = [
                 subline: 'Real talk, real culture — hit subscribe & grab the merch.', url: 'tallboy.us',
                 style: 'glow', autoHideSec: 12
             },
-            lt: { style: 'standard', kicker: 'ON AIR', active: false }
+            lt: { style: 'standard', kicker: 'ON AIR', active: false },
+            scene: { camSlots: 2, guides: false, sharedUrl: '' }
         }),
         font_family: 'Days One',
         hosts: JSON.stringify([
@@ -210,11 +212,13 @@ const DEFAULT_SHOWS = [
     }
 ];
 
+// Merch rotator default position. Kept clear of the lower-third zone so the two
+// don't mesh: right/upper-mid in 16:9, upper-left in 9:16 (per responsive strategy).
 const DEFAULT_COORDINATES = [
-    { show_id: 'lab_tech_show', canvas_mode: 'horizontal', container_top: 85, container_left: 5, image_scale: 100, text_scale: 100 },
-    { show_id: 'lab_tech_show', canvas_mode: 'vertical', container_top: 50, container_left: 50, image_scale: 100, text_scale: 100 },
-    { show_id: 'tall_boy_experience', canvas_mode: 'horizontal', container_top: 85, container_left: 5, image_scale: 100, text_scale: 100 },
-    { show_id: 'tall_boy_experience', canvas_mode: 'vertical', container_top: 50, container_left: 50, image_scale: 100, text_scale: 100 }
+    { show_id: 'lab_tech_show', canvas_mode: 'horizontal', container_top: 30, container_left: 68, image_scale: 100, text_scale: 100 },
+    { show_id: 'lab_tech_show', canvas_mode: 'vertical', container_top: 8, container_left: 6, image_scale: 100, text_scale: 100 },
+    { show_id: 'tall_boy_experience', canvas_mode: 'horizontal', container_top: 30, container_left: 68, image_scale: 100, text_scale: 100 },
+    { show_id: 'tall_boy_experience', canvas_mode: 'vertical', container_top: 8, container_left: 6, image_scale: 100, text_scale: 100 }
 ];
 
 const DEFAULT_PRODUCTS = [

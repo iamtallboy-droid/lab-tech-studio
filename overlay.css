@@ -599,3 +599,54 @@ body, html {
 .vertical-mode .lt-impact-headline { font-size: 30px; }
 .vertical-mode .lt-context-subline { font-size: 17px; }
 .vertical-mode .lt-brand-indicator { width: 56px; height: 56px; font-size: 22px; }
+
+/* -------------------------------------------------------------
+   SCENE / CAMERA ALIGNMENT GUIDES
+   ------------------------------------------------------------- */
+.scene-layout-container {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    bottom: calc(var(--ticker-height) + 24px);
+    z-index: 60;
+    display: none;            /* shown only when guides are enabled */
+    gap: 18px;
+    pointer-events: none;
+}
+
+.cam-guide-frame {
+    border: 2px dashed color-mix(in srgb, var(--secondary-color) 70%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--primary-color) 6%, transparent);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    box-shadow: inset 0 0 30px color-mix(in srgb, var(--secondary-color) 10%, transparent);
+}
+
+.cam-guide-label {
+    margin: 12px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: color-mix(in srgb, var(--primary-color) 80%, transparent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--secondary-color) 40%, transparent);
+}
+
+.scene-shared-badge {
+    grid-column: 1 / -1;
+    align-self: end;
+    justify-self: start;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #00121a;
+    background: var(--secondary-color);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--secondary-color) 55%, transparent);
+}
