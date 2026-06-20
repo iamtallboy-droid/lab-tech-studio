@@ -53,18 +53,35 @@
                 document.body.className = `show-theme-${payload.activeShowId}`;
                 document.getElementById('current-show-badge').textContent = `ACTIVE PRESET: ${payload.activeShowId.toUpperCase()}`;
                 
-                // Set logo and titles
+                // Resolve the ACTIVE show's config. payload.showConfig reflects the
+                // client's registered show, which can lag behind activeShowId — so
+                // look the active show up in showsList to keep the header correct.
+                const activeConfig =
+                    (typeof showsList !== 'undefined'
+                        ? showsList.find(s => s.show_id === payload.activeShowId)
+                        : null) || config;
+
+                // Set logo and title from the active show's own branding.
                 const logoEl = document.getElementById('header-logo');
-                if (payload.activeShowId === 'lab_tech_show') {
-                    logoEl.innerHTML = `<img src="logo.png" alt="Logo" style="height: 28px; width: auto; object-fit: contain; vertical-align: middle;">`;
+                if (activeConfig.logo_url) {
+                    logoEl.innerHTML = `<img src="${activeConfig.logo_url}" alt="${activeConfig.brand_name || 'Show'} logo"
+                        onerror="this.onerror=null; this.src='logo.svg';"
+                        style="height: 28px; width: auto; object-fit: contain; vertical-align: middle;">`;
                     logoEl.style.background = 'transparent';
                     logoEl.style.boxShadow = 'none';
                 } else {
-                    logoEl.textContent = (config.brand_name || 'LT').substring(0,2).toUpperCase();
+                    logoEl.textContent = (activeConfig.brand_name || 'LT').substring(0,2).toUpperCase();
                     logoEl.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
                     logoEl.style.boxShadow = '0 0 12px var(--primary-glow)';
                 }
-                document.getElementById('header-show-title').textContent = config.brand_name || 'Labtechshow';
+                // Short header labels keep the title from wrapping/clipping in the
+                // fixed-height header. Falls back to the full brand name.
+                const HEADER_LABELS = {
+                    lab_tech_show: 'The Lab Tech Show',
+                    tall_boy_experience: 'TBE Experience'
+                };
+                document.getElementById('header-show-title').textContent =
+                    HEADER_LABELS[payload.activeShowId] || activeConfig.brand_name || 'Labtechshow';
             }
 
             // Sync Coordinates UI Inputs
