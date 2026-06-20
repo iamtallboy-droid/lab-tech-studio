@@ -8,17 +8,20 @@
 }
 
 body.show-theme-lab_tech_show {
-    --bg-dark: #080C14;
-    --bg-panel: #0D1420;
-    --bg-overlay: rgba(8, 12, 20, 0.88);
-    --border-color: rgba(0, 194, 255, 0.12);
-    --primary-color: #E8650A;
-    --primary-glow: rgba(232, 101, 10, 0.4);
-    --secondary-color: #F59E0B;
+    /* YouTube channel-aligned palette (TheLabTechShow): electric blue + neon
+       cyan glow on dark blue-black. Replaces the legacy orange chrome. */
+    --bg-dark: #081018;          /* Dark Blue Black */
+    --bg-panel: #0D1117;         /* Secondary Background */
+    --bg-overlay: rgba(8, 16, 24, 0.88);
+    --border-color: rgba(0, 229, 255, 0.14);
+    --primary-color: #00AEEF;    /* Electric Blue — buttons, active tab */
+    --primary-glow: rgba(0, 229, 255, 0.40);
+    --secondary-color: #00E5FF;  /* Neon Cyan accent */
+    --deep-blue: #0066CC;        /* hover / pressed depth */
     --text-color: #FFFFFF;
     --text-muted: #8B95A8;
-    --accent-red: #FF3B30;
-    --accent-teal: rgba(0, 194, 255, 0.15);
+    --accent-red: #FF3131;       /* LIVE / destructive only */
+    --accent-teal: rgba(0, 229, 255, 0.15);
     --font-main: 'Inter', sans-serif;
     --font-heading: 'Inter', sans-serif;
     --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);

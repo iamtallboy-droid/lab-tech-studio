@@ -43,7 +43,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-color, #E8650A);
+    background: var(--primary-color, #00AEEF);
 }
 
 ::-webkit-scrollbar-corner {
