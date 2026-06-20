@@ -177,16 +177,27 @@
 
         async function renderSidebarList() {
             const container = document.getElementById('preset-list-container');
-            container.innerHTML = '';
-            
+
+            // Fetch FIRST, then clear+rebuild synchronously. Clearing before the
+            // await opened a race: two overlapping calls (this runs on every WS
+            // state update) both cleared, then both appended → duplicate presets.
             const shows = await api.fetchShows();
-            showsList = shows;
-            
-            shows.forEach(show => {
+
+            // De-dupe by show_id as a safeguard against any duplicate source.
+            const seen = new Set();
+            const uniqueShows = shows.filter(s => {
+                if (seen.has(s.show_id)) return false;
+                seen.add(s.show_id);
+                return true;
+            });
+            showsList = uniqueShows;
+
+            const frag = document.createDocumentFragment();
+            uniqueShows.forEach(show => {
                 const row = document.createElement('div');
                 row.className = `preset-item ${show.show_id === activeShowId ? 'active' : ''}`;
                 row.onclick = () => handleShowChange(show.show_id);
-                
+
                 row.innerHTML = `
                     <div class="preset-name">${show.brand_name}</div>
                     <div class="preset-meta">
@@ -194,8 +205,11 @@
                         <span>Font: ${show.font_family}</span>
                     </div>
                 `;
-                container.appendChild(row);
+                frag.appendChild(row);
             });
+
+            container.innerHTML = '';
+            container.appendChild(frag);
         }
 
         function renderTenantOptions() {
