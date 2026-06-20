@@ -382,14 +382,19 @@
 
         function applyLowerThird(data, card) {
             // "Why should I care?" — impact headline is the hook
-            document.getElementById('lt-kicker').textContent = (data.guest_name ? 'ON AIR GUEST' : 'BREAKING');
+            const kicker = data.kicker || (data.guest_name ? 'ON AIR GUEST' : 'BREAKING');
+            document.getElementById('lt-kicker').textContent = kicker;
             document.getElementById('lt-impact').textContent = data.impact_headline || data.guest_name || 'The Lab Tech Show';
             document.getElementById('lt-context').textContent = data.context_subline || data.guest_title || '';
             document.getElementById('lt-handle').textContent = data.guest_handle || '';
-            
+
+            // Apply the chosen style preset (standard / breaking / sponsored).
+            card.classList.remove('lt-style-standard', 'lt-style-breaking', 'lt-style-sponsored');
+            card.classList.add('lt-style-' + (data.style || 'standard'));
+
             card.classList.remove('lt-exit');
             card.classList.add('active', 'lt-enter');
-            
+
             // Remove enter class after animation completes
             setTimeout(() => card.classList.remove('lt-enter'), 600);
         }

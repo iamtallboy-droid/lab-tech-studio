@@ -540,3 +540,62 @@ body, html {
 /* Vertical scales the card up a touch for the taller canvas */
 .vertical-mode .cta-headline { font-size: 38px; }
 .vertical-mode .cta-subline { font-size: 21px; }
+
+/* -------------------------------------------------------------
+   LOWER THIRD — STYLE PRESETS + RESPONSIVE ORIENTATION
+   ------------------------------------------------------------- */
+/* Standard (brand): explicit so it overrides any preset left on the node */
+.lower-third-card.lt-style-standard {
+    border-left-color: var(--primary-color);
+}
+.lower-third-card.lt-style-standard .lt-kicker { color: var(--secondary-color); }
+.lower-third-card.lt-style-standard .lt-brand-indicator {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+/* Breaking — red alert */
+.lower-third-card.lt-style-breaking {
+    border-left-color: #FF3131;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 26px rgba(255, 49, 49, 0.35);
+}
+.lower-third-card.lt-style-breaking .lt-kicker { color: #FF6B6B; }
+.lower-third-card.lt-style-breaking .lt-impact-headline { text-shadow: 0 1px 10px rgba(255, 49, 49, 0.45); }
+.lower-third-card.lt-style-breaking .lt-brand-indicator {
+    background: linear-gradient(135deg, #FF3131, #B71C1C);
+}
+.lower-third-card.lt-style-breaking .lt-handle { color: #FF6B6B; }
+
+/* Sponsored — gold */
+.lower-third-card.lt-style-sponsored {
+    border-left-color: #F5C242;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 24px rgba(245, 194, 66, 0.30);
+}
+.lower-third-card.lt-style-sponsored .lt-kicker { color: #F5C242; }
+.lower-third-card.lt-style-sponsored .lt-impact-headline { text-shadow: 0 1px 8px rgba(245, 194, 66, 0.4); }
+.lower-third-card.lt-style-sponsored .lt-brand-indicator {
+    background: linear-gradient(135deg, #F5C242, #C68A00);
+    color: #1a1205;
+}
+.lower-third-card.lt-style-sponsored .lt-handle { color: #F5C242; }
+
+/* Horizontal: lower-left third (handled by base .lower-third-container) */
+
+/* Vertical (9:16): full-width stacked card, lifted into the lower-middle,
+   clear of the ticker — repositioned, not just scaled. */
+.vertical-mode .lower-third-container {
+    left: 5%;
+    right: 5%;
+    bottom: calc(var(--ticker-height) + 360px);
+    z-index: 90;
+}
+.vertical-mode .lower-third-card {
+    width: 90%;
+    min-width: 0;
+    border-radius: 12px;
+    border-left-width: 8px;
+    padding: 22px 28px;
+    gap: 22px;
+}
+.vertical-mode .lt-impact-headline { font-size: 30px; }
+.vertical-mode .lt-context-subline { font-size: 17px; }
+.vertical-mode .lt-brand-indicator { width: 56px; height: 56px; font-size: 22px; }

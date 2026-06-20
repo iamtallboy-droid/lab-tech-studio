@@ -173,7 +173,8 @@ const DEFAULT_SHOWS = [
                 active: false, badge: 'SUBSCRIBE', title: 'Subscribe to The Lab Tech Show',
                 subline: 'New episodes every week — never miss a drop.', url: 'youtube.com/thelabtechshow',
                 style: 'glow', autoHideSec: 12
-            }
+            },
+            lt: { style: 'standard', kicker: 'ON AIR GUEST', active: false }
         }),
         font_family: 'Inter',
         hosts: JSON.stringify([
@@ -198,7 +199,8 @@ const DEFAULT_SHOWS = [
                 active: false, badge: 'SUBSCRIBE', title: 'Join The Tall Boy Experience',
                 subline: 'Real talk, real culture — hit subscribe & grab the merch.', url: 'tallboy.us',
                 style: 'glow', autoHideSec: 12
-            }
+            },
+            lt: { style: 'standard', kicker: 'ON AIR', active: false }
         }),
         font_family: 'Days One',
         hosts: JSON.stringify([

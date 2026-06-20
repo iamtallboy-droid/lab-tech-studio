@@ -179,13 +179,16 @@
                 return;
             }
 
+            const style = document.getElementById('lt-style-select')?.value || 'standard';
+
             sendWSMessage('LOWER_THIRD_UPDATE', {
                 impact_headline: impactHeadline,
                 context_subline: contextSubline,
                 kicker,
                 guest_name: guestName,
                 guest_title: guestTitle,
-                guest_handle: guestHandle
+                guest_handle: guestHandle,
+                style
             });
 
             // Flash the button to confirm push

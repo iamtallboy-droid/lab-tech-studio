@@ -55,9 +55,10 @@
                 document.getElementById('primary-color-input').value = config.primary_hex || '#0F6FFF';
                 document.getElementById('secondary-color-input').value = config.secondary_hex || '#00A8FF';
 
-                // Populate ticker + CTA controls from saved overlay settings.
+                // Populate ticker + CTA + lower-third controls from saved settings.
                 populateTickerInputs(config);
                 populateCtaInputs(config);
+                populateLtInputs(config);
 
                 // Adjust body theme selector
                 document.body.className = `show-theme-${payload.activeShowId}`;
@@ -419,10 +420,11 @@
             conf.primary_hex = document.getElementById('primary-color-input').value;
             conf.secondary_hex = document.getElementById('secondary-color-input').value;
 
-            // Merge overlay settings (ticker + CTA; scene added later).
+            // Merge overlay settings (ticker + CTA + lower-third defaults).
             conf.overlay_settings = conf.overlay_settings || {};
             conf.overlay_settings.ticker = readTickerSettings();
             conf.overlay_settings.cta = readCtaSettings();
+            conf.overlay_settings.lt = readLtSettings();
 
             await api.createShow(conf);
             refreshState();
@@ -452,6 +454,24 @@
             set('cta-url-input', c.url || '');
             set('cta-style-select', c.style || 'standard');
             set('cta-autohide-input', c.autoHideSec != null ? c.autoHideSec : 12);
+        }
+
+        // Lower-third per-show defaults (style + kicker). The headline/context/
+        // guest fields stay transient live-push inputs.
+        function readLtSettings() {
+            const v = (id) => document.getElementById(id);
+            return {
+                style: v('lt-style-select') ? v('lt-style-select').value : 'standard',
+                kicker: v('lt-kicker-input') ? v('lt-kicker-input').value : 'ON AIR GUEST',
+                active: !!(v('lt-active-check') && v('lt-active-check').checked)
+            };
+        }
+        function populateLtInputs(config) {
+            const lt = (config && config.overlay_settings && config.overlay_settings.lt) || {};
+            const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
+            set('lt-style-select', lt.style || 'standard');
+            if (lt.kicker) set('lt-kicker-input', lt.kicker);
+            const chk = document.getElementById('lt-active-check'); if (chk) chk.checked = !!lt.active;
         }
 
         // Push the active show's CTA to the overlay immediately (fly in / hide).
