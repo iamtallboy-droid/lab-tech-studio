@@ -120,7 +120,10 @@
         let animationFrameId = null;
         let scrollPos = 0;
         let marqueeSpeed = 50;
-        let productsList = [];
+        // NOTE: productsList is declared globally in app.js (loaded above). The
+        // FULL_STATE handler there keeps it in sync, and this overlay reads/writes
+        // that same global. Re-declaring it here with `let` would throw a global
+        // redeclaration SyntaxError and abort this entire inline script.
 
         // DOM Initializer
         document.addEventListener('DOMContentLoaded', () => {
@@ -139,6 +142,17 @@
             startMerchRotation();
         });
 
+        // Convert a #RRGGBB brand color into a soft translucent glow rgba().
+        function hexToGlow(hex) {
+            if (!hex || hex[0] !== '#') return 'rgba(0,168,255,0.5)';
+            let h = hex.slice(1);
+            if (h.length === 3) h = h.split('').map(c => c + c).join('');
+            const r = parseInt(h.slice(0, 2), 16);
+            const g = parseInt(h.slice(2, 4), 16);
+            const b = parseInt(h.slice(4, 6), 16);
+            return `rgba(${r},${g},${b},0.55)`;
+        }
+
         // Handle incoming WebSocket broadcast
         function handleStateUpdate(payload) {
             currentPayload = payload;
@@ -152,17 +166,21 @@
             const root = document.documentElement;
             root.style.setProperty('--primary-color', config.primary_hex);
             root.style.setProperty('--secondary-color', config.secondary_hex);
-            
+            root.style.setProperty('--accent-color', config.accent_hex || config.secondary_hex);
+            // Glow tint derived from the secondary/accent color
+            root.style.setProperty('--brand-glow', hexToGlow(config.secondary_hex || config.primary_hex));
+
             // Adjust body font family dynamically
             document.body.style.fontFamily = (config.font_family === 'Days One') ? "'Days One', sans-serif" : "'Inter', sans-serif";
-            
-            // Render dynamic branding logo
+
+            // Render dynamic per-show branding logo
             const logoEl = document.getElementById('ticker-logo');
-            logoEl.innerHTML = `<img 
-                src="logo.png" 
-                alt="Lab Tech Show Logo" 
-                onerror="this.onerror=null; this.src='logo.svg';" 
-                style="height:34px; width:auto; object-fit:contain; vertical-align:middle; filter:drop-shadow(0 0 6px rgba(0,168,255,0.5));"
+            const showLogo = config.logo_url || 'logo.png';
+            logoEl.innerHTML = `<img
+                src="${showLogo}"
+                alt="${config.brand_name || 'Show'} Logo"
+                onerror="this.onerror=null; this.src='logo.svg';"
+                style="height:34px; width:auto; object-fit:contain; vertical-align:middle; filter:drop-shadow(0 0 6px var(--brand-glow, rgba(0,168,255,0.5)));"
             >`;
             
             // Sync canvas orientation stack styles

@@ -57,9 +57,13 @@ async function createPostgresTables() {
         brand_name TEXT NOT NULL,
         primary_hex TEXT NOT NULL,
         secondary_hex TEXT NOT NULL,
+        accent_hex TEXT,
+        logo_url TEXT,
         font_family TEXT NOT NULL,
         hosts TEXT NOT NULL
     )`);
+    await pgRun(`ALTER TABLE shows ADD COLUMN IF NOT EXISTS accent_hex TEXT`).catch(() => {});
+    await pgRun(`ALTER TABLE shows ADD COLUMN IF NOT EXISTS logo_url TEXT`).catch(() => {});
     await pgRun(`CREATE TABLE IF NOT EXISTS products (
         product_id TEXT PRIMARY KEY,
         show_id TEXT NOT NULL,
@@ -118,9 +122,9 @@ async function seedPostgresDb() {
 
     for (const show of DEFAULT_SHOWS) {
         await pgRun(
-            `INSERT INTO shows (show_id, brand_name, primary_hex, secondary_hex, font_family, hosts)
-             VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (show_id) DO NOTHING`,
-            [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.font_family, show.hosts]
+            `INSERT INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, font_family, hosts)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (show_id) DO NOTHING`,
+            [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.font_family, show.hosts]
         );
     }
     for (const c of DEFAULT_COORDINATES) {
@@ -153,8 +157,10 @@ const DEFAULT_SHOWS = [
     {
         show_id: 'lab_tech_show',
         brand_name: 'The Lab Tech Show',
-        primary_hex: '#0F6FFF',
-        secondary_hex: '#00A8FF',
+        primary_hex: '#00AEEF',
+        secondary_hex: '#00E5FF',
+        accent_hex: '#0066CC',
+        logo_url: 'logo.png',
         font_family: 'Inter',
         hosts: JSON.stringify([
             { name: 'Corey "Tall Boy" Sanders', handle: '@IamTallboy', role: 'Host' },
@@ -164,8 +170,10 @@ const DEFAULT_SHOWS = [
     {
         show_id: 'tall_boy_experience',
         brand_name: 'The Tall Boy Experience',
-        primary_hex: '#000000',
-        secondary_hex: '#1D1D1D',
+        primary_hex: '#056004',
+        secondary_hex: '#4ADE80',
+        accent_hex: '#4ADE80',
+        logo_url: 'tbe-logo.svg',
         font_family: 'Days One',
         hosts: JSON.stringify([
             { name: 'Corey "Tall Boy" Sanders', handle: '@IamTallboy', role: 'Host' },
@@ -269,9 +277,17 @@ function createTables() {
                 brand_name TEXT NOT NULL,
                 primary_hex TEXT NOT NULL,
                 secondary_hex TEXT NOT NULL,
+                accent_hex TEXT,
+                logo_url TEXT,
                 font_family TEXT NOT NULL,
                 hosts TEXT NOT NULL
             )`, (err) => { if (err) return reject(err); });
+
+            // Migration: add per-show branding columns to pre-existing DBs.
+            // (CREATE TABLE IF NOT EXISTS won't add columns to an existing table.)
+            // Duplicate-column errors are expected on already-migrated DBs and ignored.
+            sqliteDb.run(`ALTER TABLE shows ADD COLUMN accent_hex TEXT`, () => {});
+            sqliteDb.run(`ALTER TABLE shows ADD COLUMN logo_url TEXT`, () => {});
 
             sqliteDb.run(`CREATE TABLE IF NOT EXISTS products (
                 product_id TEXT PRIMARY KEY,
@@ -343,9 +359,15 @@ function seedSqliteDb() {
         sqliteDb.serialize(() => {
             // Seed Shows
             DEFAULT_SHOWS.forEach((show) => {
-                sqliteDb.run(`INSERT OR IGNORE INTO shows (show_id, brand_name, primary_hex, secondary_hex, font_family, hosts)
-                              VALUES (?, ?, ?, ?, ?, ?)`, 
-                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.font_family, show.hosts]);
+                sqliteDb.run(`INSERT OR IGNORE INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, font_family, hosts)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.font_family, show.hosts]);
+                // One-time brand sync: bring pre-existing rows up to the correct
+                // palette/logo, but only where not yet branded (logo_url empty),
+                // so user customizations are preserved.
+                sqliteDb.run(`UPDATE shows SET primary_hex=?, secondary_hex=?, accent_hex=?, logo_url=?
+                              WHERE show_id=? AND (logo_url IS NULL OR logo_url='')`,
+                              [show.primary_hex, show.secondary_hex, show.accent_hex, show.logo_url, show.show_id]);
             });
 
             // Seed Coordinates
@@ -391,9 +413,9 @@ const db = {
         const hostsStr = JSON.stringify(show.hosts || []);
         if (dbType === 'sqlite') {
             return new Promise((resolve, reject) => {
-                sqliteDb.run(`INSERT OR REPLACE INTO shows (show_id, brand_name, primary_hex, secondary_hex, font_family, hosts)
-                              VALUES (?, ?, ?, ?, ?, ?)`,
-                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.font_family, hostsStr],
+                sqliteDb.run(`INSERT OR REPLACE INTO shows (show_id, brand_name, primary_hex, secondary_hex, accent_hex, logo_url, font_family, hosts)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                              [show.show_id, show.brand_name, show.primary_hex, show.secondary_hex, show.accent_hex || null, show.logo_url || null, show.font_family, hostsStr],
                               (err) => {
                                   if (err) return reject(err);
                                   resolve();

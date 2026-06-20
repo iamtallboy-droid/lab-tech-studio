@@ -15,6 +15,52 @@
     padding-bottom: 16px;
 }
 
+/* Per-show branded banner */
+.community-brand-banner {
+    --brand-primary: #00AEEF;
+    --brand-secondary: #00E5FF;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background:
+        linear-gradient(120deg,
+            color-mix(in srgb, var(--brand-primary) 22%, transparent),
+            color-mix(in srgb, var(--brand-secondary) 10%, transparent));
+    border: 1px solid color-mix(in srgb, var(--brand-secondary) 45%, transparent);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--brand-secondary) 22%, transparent);
+}
+
+.community-brand-banner .community-show-logo {
+    height: 52px;
+    width: auto;
+    max-width: 140px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--brand-secondary) 60%, transparent));
+}
+
+.community-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.community-brand-name {
+    font-family: var(--font-heading, 'Inter');
+    font-weight: 800;
+    font-size: 18px;
+    color: #fff;
+}
+
+.community-brand-sub {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--brand-secondary) 80%, #ffffff);
+}
+
 .community-hub-title {
     font-family: var(--font-heading);
     font-size: 18px;

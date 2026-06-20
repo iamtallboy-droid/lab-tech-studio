@@ -4,7 +4,25 @@
         // ================================================================
         // COMMUNITY HUB FUNCTIONS
         // ================================================================
+
+        // Apply the active show's logo + brand color to the Community Hub banner.
+        function renderCommunityBranding() {
+            const show = (typeof showsList !== 'undefined' ? showsList : [])
+                .find(s => s.show_id === activeShowId);
+            if (!show) return;
+            const logoEl = document.getElementById('community-show-logo');
+            const nameEl = document.getElementById('community-brand-name');
+            const banner = document.getElementById('community-brand-banner');
+            if (logoEl) logoEl.src = show.logo_url || 'logo.png';
+            if (nameEl) nameEl.textContent = show.brand_name || '';
+            if (banner) {
+                banner.style.setProperty('--brand-primary', show.primary_hex || '#00AEEF');
+                banner.style.setProperty('--brand-secondary', show.secondary_hex || show.primary_hex || '#00E5FF');
+            }
+        }
+
         async function loadCommunityStatus() {
+            renderCommunityBranding();
             const statusData = await api.fetchCommunityStatus();
 
             // Server status card
