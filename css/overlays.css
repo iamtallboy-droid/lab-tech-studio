@@ -258,3 +258,40 @@
     border-radius: 4px;
     color: var(--secondary-color);
 }
+
+/* ---- CTA Library (dashboard editor) ---- */
+.cta-library-list { display: flex; flex-direction: column; gap: 12px; }
+
+.cta-lib-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.cta-lib-head { display: flex; align-items: center; gap: 8px; }
+.cta-lib-head .cta-f-badge {
+    flex: 1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--secondary-color);
+}
+.cta-lib-del {
+    background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+    border-radius: 6px; width: 30px; height: 30px; cursor: pointer; flex-shrink: 0;
+}
+.cta-lib-del:hover { color: var(--accent-red); border-color: var(--accent-red); }
+
+.cta-lib-card input[type="text"],
+.cta-lib-card input[type="number"],
+.cta-lib-card select {
+    width: 100%; background: var(--bg-dark); border: 1px solid var(--border-color);
+    color: var(--text-color); border-radius: 6px; padding: 7px 9px; font-size: 13px;
+}
+.cta-lib-row { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 8px; }
+.cta-lib-row label {
+    display: flex; flex-direction: column; gap: 3px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
+}
+.cta-lib-fly { align-self: flex-start; margin-top: 2px; }

@@ -169,11 +169,15 @@ const DEFAULT_SHOWS = [
                 source: 'manual', speed: 60, fontSize: 24, barHeight: 55, barOpacity: 0.92,
                 uppercase: false, separator: 'dot', badgeText: 'LIVE', badgeOn: true, accentHex: '#00E5FF'
             },
-            cta: {
-                active: false, badge: 'SUBSCRIBE', title: 'Subscribe to The Lab Tech Show',
-                subline: 'New episodes every week — never miss a drop.', url: 'youtube.com/thelabtechshow',
-                style: 'glow', autoHideSec: 12
-            },
+            ctas: [
+                { id: 'subscribe', badge: 'SUBSCRIBE', title: 'Subscribe to The Lab Tech Show', subline: 'New episodes every week — never miss a drop.', url: 'youtube.com/thelabtechshow', style: 'glow', durationSec: 12, position: 'lower-right' },
+                { id: 'like', badge: 'LIKE', title: 'Smash That Like Button', subline: 'It tells YouTube to push this to more people.', url: '', style: 'glow', durationSec: 8, position: 'lower-right' },
+                { id: 'bell', badge: 'NOTIFICATIONS', title: 'Ring the Bell 🔔', subline: 'Get pinged the moment we go live.', url: '', style: 'glow', durationSec: 8, position: 'lower-right' },
+                { id: 'member', badge: 'MEMBERSHIP', title: 'Become a Channel Member', subline: 'Exclusive perks, badges & behind-the-scenes.', url: 'youtube.com/thelabtechshow/join', style: 'glow', durationSec: 12, position: 'lower-right' },
+                { id: 'comment', badge: 'JOIN THE CHAT', title: 'Drop a Comment Below', subline: 'What should we break down next?', url: '', style: 'standard', durationSec: 10, position: 'lower-left' },
+                { id: 'share', badge: 'SHARE', title: 'Share This Episode', subline: 'Know someone who needs this? Send it over.', url: '', style: 'standard', durationSec: 8, position: 'lower-right' },
+                { id: 'merch', badge: 'SHOP', title: 'Grab the Merch', subline: 'Official gear at shop.tallboy.us', url: 'shop.tallboy.us', style: 'glow', durationSec: 10, position: 'upper-right' }
+            ],
             lt: { style: 'standard', kicker: 'ON AIR GUEST', active: false },
             scene: { camSlots: 2, guides: false, sharedUrl: '' }
         }),
@@ -196,11 +200,10 @@ const DEFAULT_SHOWS = [
                 source: 'manual', speed: 60, fontSize: 24, barHeight: 55, barOpacity: 0.92,
                 uppercase: false, separator: 'dot', badgeText: 'LIVE', badgeOn: true, accentHex: '#4ADE80'
             },
-            cta: {
-                active: false, badge: 'SUBSCRIBE', title: 'Join The Tall Boy Experience',
-                subline: 'Real talk, real culture — hit subscribe & grab the merch.', url: 'tallboy.us',
-                style: 'glow', autoHideSec: 12
-            },
+            ctas: [
+                { id: 'subscribe', badge: 'SUBSCRIBE', title: 'Join The Tall Boy Experience', subline: 'Real talk, real culture — hit subscribe.', url: 'tallboy.us', style: 'glow', durationSec: 12, position: 'lower-right' },
+                { id: 'merch', badge: 'SHOP', title: 'Grab the Merch', subline: 'Official gear at shop.tallboy.us', url: 'shop.tallboy.us', style: 'glow', durationSec: 10, position: 'upper-right' }
+            ],
             lt: { style: 'standard', kicker: 'ON AIR', active: false },
             scene: { camSlots: 2, guides: false, sharedUrl: '' }
         }),

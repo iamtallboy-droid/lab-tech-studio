@@ -298,57 +298,24 @@
                                         </div>
                                     </div>
 
-                                    <!-- SUBTAB: CTA FLY-IN -->
+                                    <!-- SUBTAB: CTA FLY-IN LIBRARY -->
                                     <div class="sub-panel" id="sub-cta">
                                         <div class="form-section">
-                                            <h4 class="section-title">Call to Action Card</h4>
-                                            
-                                            <div class="form-group check-group">
-                                                <input type="checkbox" id="cta-active-check" onchange="updateShowSettings()">
-                                                <label for="cta-active-check">AIR CTA CARD OVERLAY</label>
+                                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                                <h4 class="section-title" style="margin:0;">CTA Library</h4>
+                                                <button class="btn btn-outline btn-sm" onclick="addCta()">+ Add CTA</button>
                                             </div>
-
-                                            <div class="form-group">
-                                                <label>Badge Header</label>
-                                                <input type="text" id="cta-badge-input" onchange="updateShowSettings()">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Main Title</label>
-                                                <input type="text" id="cta-title-input" onchange="updateShowSettings()">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Description Subline</label>
-                                                <textarea id="cta-subline-input" rows="2" onchange="updateShowSettings()"></textarea>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Footer Call / URL</label>
-                                                <input type="text" id="cta-url-input" onchange="updateShowSettings()">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Card Style</label>
-                                                <select id="cta-style-select" onchange="updateShowSettings()">
-                                                    <option value="standard">Standard</option>
-                                                    <option value="glow">Neon Glow</option>
-                                                    <option value="minimal">Minimal</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Auto-Hide After (seconds, 0 = stay)</label>
-                                                <input type="number" id="cta-autohide-input" min="0" max="120" step="1" value="12" onchange="updateShowSettings()">
-                                            </div>
-
-                                            <p class="section-desc" style="margin:6px 0 12px; color:rgba(255,255,255,0.55); font-size:12px;">
-                                                Flies in lower-right in 16:9, and up-from-bottom (centered) in 9:16 — repositioned per orientation, never meshed.
+                                            <p class="section-desc" style="margin:8px 0 14px; color:rgba(255,255,255,0.55); font-size:12px;">
+                                                Each CTA flies in on its own. Tune <strong>time on screen</strong> and <strong>position</strong> per card,
+                                                then hit <strong>FLY IN</strong> to push it live. All cards are branded to the active show automatically.
                                             </p>
 
-                                            <div class="form-actions" style="display:flex; gap:10px;">
-                                                <button class="btn btn-primary" onclick="triggerCtaFlyIn()" id="cta-fly-btn">▶ FLY IN NOW</button>
-                                                <button class="btn btn-outline" onclick="triggerCtaHide()">✕ Hide CTA</button>
+                                            <div id="cta-library-list" class="cta-library-list">
+                                                <!-- Populated dynamically from overlay_settings.ctas -->
+                                            </div>
+
+                                            <div class="form-actions" style="display:flex; gap:10px; margin-top:14px;">
+                                                <button class="btn btn-outline" onclick="triggerCtaHide()">✕ Hide CTA on Overlay</button>
                                             </div>
                                         </div>
                                     </div>

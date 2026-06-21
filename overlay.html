@@ -143,39 +143,36 @@
         }
 
         // ---- CTA Fly-In -------------------------------------------------
-        let currentCta = {};
         let ctaHideTimer = null;
+        const CTA_POSITIONS = ['lower-right', 'lower-left', 'upper-right', 'upper-left', 'center'];
 
-        // Apply a show's CTA content/style and reflect its active state.
-        // Position + fly-in direction are handled by the orientation CSS
-        // (lower-right + slide-from-right horizontally; centered + slide-up
-        // vertically), so the same card stays clean in both formats.
-        function applyCtaSettings(config) {
-            const c = (config && config.overlay_settings && config.overlay_settings.cta) || {};
-            currentCta = c;
+        // Render one CTA from the library onto the single fly-in card: content,
+        // brand style preset, and on-screen position anchor.
+        function setCtaCard(cta) {
             const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-            set('cta-badge', c.badge || 'SUBSCRIBE');
-            set('cta-headline', c.title || '');
-            set('cta-subline', c.subline || '');
-            set('cta-action', c.url || '');
+            set('cta-badge', cta.badge || 'SUBSCRIBE');
+            set('cta-headline', cta.title || '');
+            set('cta-subline', cta.subline || '');
+            set('cta-action', cta.url || '');
 
             const card = document.getElementById('cta-card');
             if (card) {
                 card.classList.remove('cta-style-standard', 'cta-style-minimal', 'cta-style-glow');
-                card.classList.add('cta-style-' + (c.style || 'standard'));
+                card.classList.add('cta-style-' + (cta.style || 'standard'));
             }
-
-            // Honor the saved "AIR CTA" toggle on state sync.
-            if (c.active) showCtaFlyIn(c.autoHideSec);
-            else hideCtaFlyIn();
+            const cont = document.getElementById('cta-container');
+            if (cont) {
+                CTA_POSITIONS.forEach(p => cont.classList.remove('cta-pos-' + p));
+                cont.classList.add('cta-pos-' + (cta.position || 'lower-right'));
+            }
         }
 
-        function showCtaFlyIn(autoHideSec) {
+        function showCtaFlyIn(durationSec) {
             const cont = document.getElementById('cta-container');
             if (!cont) return;
             cont.classList.add('cta-visible');
             if (ctaHideTimer) { clearTimeout(ctaHideTimer); ctaHideTimer = null; }
-            const secs = parseFloat(autoHideSec != null ? autoHideSec : currentCta.autoHideSec);
+            const secs = parseFloat(durationSec);
             if (secs && secs > 0) {
                 ctaHideTimer = setTimeout(hideCtaFlyIn, secs * 1000);
             }
@@ -187,24 +184,15 @@
             if (ctaHideTimer) { clearTimeout(ctaHideTimer); ctaHideTimer = null; }
         }
 
-        // Dashboard "FLY IN NOW" trigger.
+        // CTAs are push-triggered from the dashboard library; nothing to auto-show.
+        function applyCtaSettings(config) { /* no-op on state sync */ }
+
+        // Dashboard "FLY IN NOW" for a specific CTA from the library.
         window.onCtaFlyIn = function (payload) {
-            if (payload && payload.cta) {
-                // Live content override without needing a full state refresh.
-                currentCta = Object.assign({}, currentCta, payload.cta);
-                const set = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.textContent = v; };
-                set('cta-badge', currentCta.badge);
-                set('cta-headline', currentCta.title);
-                set('cta-subline', currentCta.subline);
-                set('cta-action', currentCta.url);
-                const card = document.getElementById('cta-card');
-                if (card && currentCta.style) {
-                    card.classList.remove('cta-style-standard', 'cta-style-minimal', 'cta-style-glow');
-                    card.classList.add('cta-style-' + currentCta.style);
-                }
-            }
-            if (payload && payload.action === 'hide') hideCtaFlyIn();
-            else showCtaFlyIn(payload && payload.autoHideSec);
+            if (payload && payload.action === 'hide') { hideCtaFlyIn(); return; }
+            const cta = (payload && payload.cta) || {};
+            setCtaCard(cta);
+            showCtaFlyIn(cta.durationSec != null ? cta.durationSec : (payload && payload.durationSec));
         };
         // NOTE: productsList is declared globally in app.js (loaded above). The
         // FULL_STATE handler there keeps it in sync, and this overlay reads/writes

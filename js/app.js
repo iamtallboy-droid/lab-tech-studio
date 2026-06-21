@@ -424,7 +424,7 @@
             // Merge overlay settings (ticker + CTA + lower-third + scene).
             conf.overlay_settings = conf.overlay_settings || {};
             conf.overlay_settings.ticker = readTickerSettings();
-            conf.overlay_settings.cta = readCtaSettings();
+            conf.overlay_settings.ctas = readCtaLibrary();
             conf.overlay_settings.lt = readLtSettings();
             conf.overlay_settings.scene = readSceneSettings();
 
@@ -432,30 +432,81 @@
             refreshState();
         }
 
-        function readCtaSettings() {
-            const v = (id) => document.getElementById(id);
-            return {
-                active: !!(v('cta-active-check') && v('cta-active-check').checked),
-                badge: v('cta-badge-input') ? v('cta-badge-input').value : 'SUBSCRIBE',
-                title: v('cta-title-input') ? v('cta-title-input').value : '',
-                subline: v('cta-subline-input') ? v('cta-subline-input').value : '',
-                url: v('cta-url-input') ? v('cta-url-input').value : '',
-                style: v('cta-style-select') ? v('cta-style-select').value : 'standard',
-                autoHideSec: v('cta-autohide-input') ? parseInt(v('cta-autohide-input').value || '0', 10) : 12
-            };
+        // ---- CTA LIBRARY (multiple per-show CTAs) ----------------------
+        const CTA_POSITION_OPTS = [
+            ['lower-right', 'Lower Right'], ['lower-left', 'Lower Left'],
+            ['upper-right', 'Upper Right'], ['upper-left', 'Upper Left'], ['center', 'Center']
+        ];
+
+        // Render the editable CTA library list from a config's ctas array.
+        function populateCtaInputs(config) {
+            let ctas = (config && config.overlay_settings && config.overlay_settings.ctas) || null;
+            // Back-compat: migrate a legacy single `cta` object into an array.
+            if (!ctas && config && config.overlay_settings && config.overlay_settings.cta) {
+                const c = config.overlay_settings.cta;
+                ctas = [{ id: 'cta-1', badge: c.badge, title: c.title, subline: c.subline, url: c.url, style: c.style || 'glow', durationSec: c.autoHideSec != null ? c.autoHideSec : 12, position: 'lower-right' }];
+            }
+            renderCtaLibrary(ctas || []);
         }
 
-        function populateCtaInputs(config) {
-            const c = (config && config.overlay_settings && config.overlay_settings.cta) || {};
-            const set = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = v; };
-            const check = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
-            check('cta-active-check', c.active);
-            set('cta-badge-input', c.badge || 'SUBSCRIBE');
-            set('cta-title-input', c.title || '');
-            set('cta-subline-input', c.subline || '');
-            set('cta-url-input', c.url || '');
-            set('cta-style-select', c.style || 'standard');
-            set('cta-autohide-input', c.autoHideSec != null ? c.autoHideSec : 12);
+        function renderCtaLibrary(ctas) {
+            const list = document.getElementById('cta-library-list');
+            if (!list) return;
+            list.innerHTML = '';
+            ctas.forEach((c, i) => {
+                const posOpts = CTA_POSITION_OPTS.map(([v, lbl]) =>
+                    `<option value="${v}" ${ (c.position || 'lower-right') === v ? 'selected' : '' }>${lbl}</option>`).join('');
+                const styleOpts = [['standard', 'Standard'], ['glow', 'Neon Glow'], ['minimal', 'Minimal']].map(([v, lbl]) =>
+                    `<option value="${v}" ${ (c.style || 'glow') === v ? 'selected' : '' }>${lbl}</option>`).join('');
+                const card = document.createElement('div');
+                card.className = 'cta-lib-card';
+                card.dataset.id = c.id || ('cta-' + (i + 1));
+                card.innerHTML = `
+                    <div class="cta-lib-head">
+                        <input class="cta-f-badge" type="text" value="${escapeHtml(c.badge || '')}" placeholder="BADGE" onchange="updateShowSettings()">
+                        <button class="cta-lib-del" title="Delete CTA" onclick="deleteCta(${i})">✕</button>
+                    </div>
+                    <input class="cta-f-title" type="text" value="${escapeHtml(c.title || '')}" placeholder="Main title" onchange="updateShowSettings()">
+                    <input class="cta-f-subline" type="text" value="${escapeHtml(c.subline || '')}" placeholder="Subline" onchange="updateShowSettings()">
+                    <input class="cta-f-url" type="text" value="${escapeHtml(c.url || '')}" placeholder="Footer URL (optional)" onchange="updateShowSettings()">
+                    <div class="cta-lib-row">
+                        <label>Style<select class="cta-f-style" onchange="updateShowSettings()">${styleOpts}</select></label>
+                        <label>Position<select class="cta-f-position" onchange="updateShowSettings()">${posOpts}</select></label>
+                        <label>Seconds<input class="cta-f-duration" type="number" min="0" max="120" value="${c.durationSec != null ? c.durationSec : 12}" onchange="updateShowSettings()"></label>
+                    </div>
+                    <button class="btn btn-primary btn-sm cta-lib-fly" onclick="triggerCtaFlyIn(${i})">▶ FLY IN</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // Read the library back out of the DOM (used on save + fly-in).
+        function readCtaLibrary() {
+            const list = document.getElementById('cta-library-list');
+            if (!list) return [];
+            return [...list.querySelectorAll('.cta-lib-card')].map((card, i) => ({
+                id: card.dataset.id || ('cta-' + (i + 1)),
+                badge: card.querySelector('.cta-f-badge').value,
+                title: card.querySelector('.cta-f-title').value,
+                subline: card.querySelector('.cta-f-subline').value,
+                url: card.querySelector('.cta-f-url').value,
+                style: card.querySelector('.cta-f-style').value,
+                position: card.querySelector('.cta-f-position').value,
+                durationSec: parseInt(card.querySelector('.cta-f-duration').value || '0', 10)
+            }));
+        }
+
+        function addCta() {
+            const ctas = readCtaLibrary();
+            ctas.push({ id: 'cta-' + Date.now(), badge: 'SUBSCRIBE', title: 'New CTA', subline: '', url: '', style: 'glow', position: 'lower-right', durationSec: 10 });
+            renderCtaLibrary(ctas);
+            updateShowSettings();
+        }
+        function deleteCta(idx) {
+            const ctas = readCtaLibrary();
+            ctas.splice(idx, 1);
+            renderCtaLibrary(ctas);
+            updateShowSettings();
         }
 
         // Lower-third per-show defaults (style + kicker). The headline/context/
@@ -493,11 +544,14 @@
             const chk = document.getElementById('cam-guides-check'); if (chk) chk.checked = !!sc.guides;
         }
 
-        // Push the active show's CTA to the overlay immediately (fly in / hide).
-        function triggerCtaFlyIn() {
-            const cta = readCtaSettings();
-            sendWSMessage('CTA_FLYIN', { showId: activeShowId, cta, autoHideSec: cta.autoHideSec });
-            showToast('▶ CTA flying in on overlay', 'success');
+        // Fly a specific CTA from the library onto the overlay (with its own
+        // position + time-on-screen). Saves any pending edits first.
+        function triggerCtaFlyIn(idx) {
+            const ctas = readCtaLibrary();
+            const cta = ctas[idx];
+            if (!cta) return;
+            sendWSMessage('CTA_FLYIN', { showId: activeShowId, cta, durationSec: cta.durationSec });
+            showToast(`▶ "${cta.title || cta.badge}" flying in`, 'success');
         }
         function triggerCtaHide() {
             sendWSMessage('CTA_FLYIN', { showId: activeShowId, action: 'hide' });
