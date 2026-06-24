@@ -15,6 +15,7 @@ const axios = require('axios');
 const { initDb, db } = require('./db');
 const { addToQueue, getTranscoderStatus, setBroadcastCallback } = require('./transcoder');
 const { runStorefrontScrape, startBackgroundScraper, stopAllScrapers } = require('./scraper');
+const { fetchRssHeadlines } = require('./rss');
 const { initRedis, cacheGet, cacheSet, flushPrefix, getRedisStatus } = require('./redis-client');
 
 const PORT = parseInt(process.env.PORT || '7335', 10);
@@ -451,6 +452,21 @@ app.delete('/api/shows/:id/briefs/:briefId', async (req, res) => {
 // ================================================================
 // REST API: SCRAPER
 // ================================================================
+app.get('/api/rss/:feed', async (req, res) => {
+    const feed = req.params.feed;
+    const redisKey = `rss_feed:${feed}`;
+    try {
+        const cached = await cacheGet(redisKey);
+        if (cached) return res.json({ feed, headlines: cached, cached: true });
+
+        const headlines = await fetchRssHeadlines(feed);
+        await cacheSet(redisKey, headlines, 600); // 10 min — avoid hammering the source feed
+        res.json({ feed, headlines, cached: false });
+    } catch (err) {
+        res.status(502).json({ error: err.message });
+    }
+});
+
 app.post('/api/shows/:id/scrape', async (req, res) => {
     const { username, password } = req.body;
     try {

@@ -46,19 +46,6 @@
             </div>
         </div>
 
-        <!-- INFOGRAPHIC FORMULA CALLOUT -->
-        <div id="formula-callout-container" class="formula-callout-container">
-            <div id="formula-card" class="formula-card">
-                <div class="formula-operand" id="formula-left-operand">CONCEPT A</div>
-                <div class="formula-symbol plus-symbol">+</div>
-                <div class="formula-operand" id="formula-right-operand">CONCEPT B</div>
-                <div class="formula-symbol equals-symbol">=</div>
-                <div class="formula-result-panel" id="formula-result-panel">
-                    <span id="formula-result-text">RESULT</span>
-                </div>
-            </div>
-        </div>
-
         <!-- LOWER THIRDS OVERLAYS -->
         <div class="lower-third-container">
             <div id="lower-third-card" class="lower-third-card">
@@ -442,6 +429,8 @@
                         renderTickerItems(lines);
                     }
                 });
+            } else if (currentTicker && currentTicker.source === 'rss' && Array.isArray(currentTicker.rssHeadlines) && currentTicker.rssHeadlines.length) {
+                renderTickerItems(currentTicker.rssHeadlines);
             } else {
                 // Use the show's own ticker headlines (from the dashboard); fall
                 // back to generic lines only if none are configured.

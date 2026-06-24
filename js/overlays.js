@@ -32,7 +32,40 @@
                 previewViewport.style.aspectRatio = '16/9';
             }
             localStorage.setItem('labtech_canvas_mode', activeCanvasRatio);
+            scalePreviewIframe();
         }
+
+        // -------------------------------------------------------------
+        // PREVIEW IFRAME SCALING
+        // The overlay canvas is a fixed-pixel design (1920x1080 or
+        // 1080x1920) meant for vMix/Ecamm capture at that exact
+        // resolution. The dashboard's monitor box is much smaller, so we
+        // render the iframe at full design size and scale it down with a
+        // CSS transform rather than letting it get clipped by the
+        // smaller box — otherwise content past the clipped edge (e.g.
+        // the 3rd/4th/6th camera guide frame) is never visible.
+        // -------------------------------------------------------------
+        function scalePreviewIframe() {
+            const scaler = document.getElementById('preview-frame-scaler');
+            const iframe = document.getElementById('preview-iframe');
+            if (!scaler || !iframe) return;
+
+            const designWidth = activeCanvasRatio === 'vertical' ? 1080 : 1920;
+            const designHeight = activeCanvasRatio === 'vertical' ? 1920 : 1080;
+            iframe.style.width = designWidth + 'px';
+            iframe.style.height = designHeight + 'px';
+
+            const scale = scaler.clientWidth / designWidth;
+            iframe.style.transform = `scale(${scale})`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const scaler = document.getElementById('preview-frame-scaler');
+            if (scaler) {
+                new ResizeObserver(() => scalePreviewIframe()).observe(scaler);
+            }
+            scalePreviewIframe();
+        });
 
         // -------------------------------------------------------------
         // POSITION ALIGNMENT & GRANULAR / TURBO CONTROLS
@@ -161,6 +194,13 @@
                 manualText.classList.remove('hidden');
                 rssSelect.classList.add('hidden');
             }
+        }
+
+        // Toggle buttons call this (vs. setTickerSource alone, used when
+        // restoring UI from a fetched config) so picking a source persists it.
+        function selectTickerSource(source) {
+            setTickerSource(source);
+            updateShowSettings();
         }
 
         // ================================================================

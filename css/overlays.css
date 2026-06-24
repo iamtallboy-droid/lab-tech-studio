@@ -228,12 +228,24 @@
     min-height: 480px;
 }
 
-#preview-iframe {
+.preview-frame-scaler {
+    position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
+    height: 100%;
+    overflow: hidden;
     border: 1px solid rgba(255,255,255,0.1);
-    background: transparent;
     box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+#preview-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    border: none;
+    background: transparent;
+    transform-origin: top left;
 }
 
 .overlay-url-footer {

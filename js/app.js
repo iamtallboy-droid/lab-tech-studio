@@ -29,6 +29,8 @@
         let selectedSubTab = 'sub-ticker';
         let selectedBriefId = null;
         let activeCanvasRatio = 'horizontal';
+        let currentRssFeedKey = null;
+        let currentRssHeadlines = [];
 
         // -------------------------------------------------------------
         // BROADCAST STATE HANDLERS (FROM WEBSOCKET)
@@ -389,6 +391,19 @@
             sync('ticker-fontsize', 'val-ticker-font');
             sync('ticker-barheight', 'val-ticker-height');
             sync('ticker-opacity', 'val-ticker-opacity');
+
+            // Restore RSS feed selection + last-fetched headlines (these live
+            // outside the form, so the toggle/select alone won't bring them back).
+            currentRssFeedKey = t.rssFeedKey || null;
+            currentRssHeadlines = Array.isArray(t.rssHeadlines) ? t.rssHeadlines : [];
+            set('ticker-rss-feed-select', currentRssFeedKey || 'engadget');
+            const status = document.getElementById('ticker-rss-status');
+            if (status) {
+                status.textContent = currentRssHeadlines.length
+                    ? `Loaded ${currentRssHeadlines.length} headlines from "${currentRssFeedKey}".`
+                    : '';
+            }
+            setTickerSource(t.source || 'manual');
         }
 
         function readTickerSettings() {
@@ -404,7 +419,9 @@
                 separator: val('ticker-separator') ? val('ticker-separator').value : 'dot',
                 badgeText: val('ticker-badge-text') ? (val('ticker-badge-text').value || 'LIVE') : 'LIVE',
                 badgeOn: val('ticker-badge-on') ? val('ticker-badge-on').checked : true,
-                accentHex: val('ticker-accent-color') ? val('ticker-accent-color').value : '#00E5FF'
+                accentHex: val('ticker-accent-color') ? val('ticker-accent-color').value : '#00E5FF',
+                rssFeedKey: currentRssFeedKey,
+                rssHeadlines: currentRssHeadlines
             };
         }
 
@@ -570,9 +587,30 @@
         }
 
         async function handleRssChange(feed) {
-            alert(`Fetching RSS feed elements for ${feed}...`);
-            // Mock scraper logic in app.js or query server endpoint
-            // Usually server will run RSS parsing. We trigger update on server
+            const status = document.getElementById('ticker-rss-status');
+            if (status) status.textContent = `Fetching headlines from "${feed}"...`;
+
+            try {
+                const res = await fetch(`/api/rss/${encodeURIComponent(feed)}`);
+                const data = await res.json();
+                if (!res.ok || !Array.isArray(data.headlines)) {
+                    throw new Error(data.error || 'Feed request failed');
+                }
+
+                currentRssFeedKey = feed;
+                currentRssHeadlines = data.headlines;
+
+                if (status) {
+                    status.textContent = data.headlines.length
+                        ? `Loaded ${data.headlines.length} headlines from "${feed}".`
+                        : `"${feed}" returned no headlines.`;
+                }
+                await updateShowSettings();
+                showToast(`✓ RSS feed "${feed}" loaded`, 'success');
+            } catch (err) {
+                if (status) status.textContent = `Failed to load "${feed}": ${err.message}`;
+                showToast(`RSS fetch failed: ${err.message}`, 'error');
+            }
         }
 
         function duplicateShow() {

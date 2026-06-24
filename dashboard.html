@@ -186,8 +186,8 @@
                                             <div class="form-group">
                                                 <label>Headline List Source</label>
                                                 <div class="toggle-buttons">
-                                                    <button class="toggle-btn active" id="ticker-src-manual" onclick="setTickerSource('manual')">Manual Entries</button>
-                                                    <button class="toggle-btn" id="ticker-src-rss" onclick="setTickerSource('rss')">Live RSS Feeds</button>
+                                                    <button class="toggle-btn active" id="ticker-src-manual" onclick="selectTickerSource('manual')">Manual Entries</button>
+                                                    <button class="toggle-btn" id="ticker-src-rss" onclick="selectTickerSource('rss')">Live RSS Feeds</button>
                                                 </div>
                                             </div>
 
@@ -199,11 +199,15 @@
                                             <div id="ticker-rss-entries" class="hidden">
                                                 <div class="form-group">
                                                     <label>Select RSS Feed Source</label>
-                                                    <select id="ticker-rss-feed-select" onchange="handleRssChange(this.value)">
-                                                        <option value="engadget">Engadget Feed</option>
-                                                        <option value="9to5google">9to5Google Feed</option>
-                                                        <option value="techradar">TechRadar Feed</option>
-                                                    </select>
+                                                    <div style="display:flex; gap:8px;">
+                                                        <select id="ticker-rss-feed-select" onchange="handleRssChange(this.value)" style="flex:1;">
+                                                            <option value="engadget">Engadget Feed</option>
+                                                            <option value="9to5google">9to5Google Feed</option>
+                                                            <option value="techradar">TechRadar Feed</option>
+                                                        </select>
+                                                        <button type="button" class="btn btn-secondary btn-sm" onclick="handleRssChange(document.getElementById('ticker-rss-feed-select').value)">⟳ Refresh</button>
+                                                    </div>
+                                                    <p id="ticker-rss-status" class="section-desc" style="margin-top:6px;"></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -516,7 +520,9 @@
                                     </div>
                                 </div>
                                 <div class="preview-frame-container" id="preview-frame-container">
-                                    <iframe id="preview-iframe" src="overlay.html"></iframe>
+                                    <div class="preview-frame-scaler" id="preview-frame-scaler">
+                                        <iframe id="preview-iframe" src="overlay.html"></iframe>
+                                    </div>
                                 </div>
                                 <div class="overlay-url-footer">
                                     <span>VMIX WEB SOURCE BROWSER TARGET PATH:</span>
