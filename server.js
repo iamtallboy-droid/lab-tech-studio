@@ -42,6 +42,7 @@ const upload = multer({
 // Serve frontend assets
 app.use(express.static(__dirname));
 app.use('/transcoded', express.static(path.join(__dirname, 'transcoded')));
+app.get('/', (req, res) => res.redirect('/dashboard.html'));
 
 // Active broadcast state in memory
 let broadcastState = {
